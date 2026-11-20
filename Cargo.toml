@@ -1,0 +1,8 @@
+[package]
+name = "songbookclear"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Lekki śpiewnik lokalny z interfejsem Canvas i serwerem HTTP w czystym Rust (std)."
+
+[dependencies]
