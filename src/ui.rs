@@ -259,6 +259,10 @@ button.viewer-tool-btn.chords-hidden {
   border-color: rgba(148, 163, 184, 0.35);
   color: rgba(226, 232, 240, 0.5);
 }
+button.viewer-tool-btn.style-custom {
+  border-color: #60a5fa;
+  background: #1e3a5f;
+}
 button.viewer-present-float {
   position: absolute;
   top: 8px;
@@ -383,6 +387,22 @@ button.viewer-present-float {
   font-size: 13px;
   color: #e2e8f0;
   cursor: pointer;
+}
+.font-scale-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.font-scale-btn {
+  flex: 1 1 56px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.font-scale-btn.active {
+  background: #1e3a5f;
+  border-color: #60a5fa;
+  color: #eff6ff;
 }
 .qr-url-row {
   display: flex;
@@ -684,6 +704,27 @@ button.viewer-present-float {
   width: 112px;
   font-variant-numeric: tabular-nums;
 }
+.pl-search-field {
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 300px;
+}
+.pl-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pl-search-icon {
+  position: absolute;
+  left: 9px;
+  color: #9ca3af;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+}
+.pl-search-input-wrap input[type="text"] {
+  padding-left: 30px;
+}
 .input-with-icon {
   position: relative;
   display: flex;
@@ -825,6 +866,10 @@ input:focus, select:focus, textarea:focus {
   .pdf-options-grid {
     grid-template-columns: 1fr;
   }
+  .pl-search-field {
+    max-width: none;
+    width: 100%;
+  }
   .span-2, .span-3 { grid-column: span 1; }
 }
 @media (max-width: 600px) {
@@ -915,13 +960,7 @@ input:focus, select:focus, textarea:focus {
       </svg>
     </button>
     <button type="button" id="btn-viewer-chords" class="viewer-tool-btn chords-hidden" title="Akordy ukryte — kliknij, aby włączyć u siebie" onclick="toggleViewerChords()">A</button>
-    <button type="button" id="btn-viewer-download" class="viewer-tool-btn" title="Pobierz buforowany tekst utworu (.txt)" onclick="downloadCurrentSongAsTxt()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
-        <path d="M12 4v12"/>
-        <path d="m7 11 5 5 5-5"/>
-        <path d="M5 20h14"/>
-      </svg>
-    </button>
+    <button type="button" id="btn-viewer-style" class="viewer-tool-btn" title="Wielkość liter i kolory u Ciebie" onclick="openViewerStyleModal()">🎨</button>
   </div>
   <button type="button" id="btn-viewer-present-float" class="viewer-present-float hidden" title="Pokaż menu uczestnika" onclick="toggleViewerPresentationMode()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -944,6 +983,60 @@ input:focus, select:focus, textarea:focus {
     <button type="button" id="btn-next" class="btn-transport" title="Dalej" onclick="manualStep('next')">►</button>
     <button type="button" id="btn-chords-toggle" class="btn-chords-toggle" title="Pokaż / ukryj akordy" onclick="toggleChordsVisibility()">A</button>
     <button type="button" id="btn-srv-toggle" class="btn-srv-stop" onclick="toggleServerState()">● [Stop]</button>
+  </div>
+</div>
+
+<div id="viewer-style-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onViewerStyleBackdropClick(event)">
+  <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="viewer-style-modal-title">
+    <h3 id="viewer-style-modal-title" class="qr-modal-title">Twój wygląd tekstu</h3>
+
+    <div class="pdf-options-box">
+      <div class="pdf-options-title">Wielkość liter</div>
+      <div class="font-scale-row" id="viewer-font-scale-group">
+        <button type="button" class="font-scale-btn" data-scale="0" onclick="setViewerFontScale(0)">Auto</button>
+        <button type="button" class="font-scale-btn" data-scale="0.85" onclick="setViewerFontScale(0.85)">85%</button>
+        <button type="button" class="font-scale-btn" data-scale="1" onclick="setViewerFontScale(1)">100%</button>
+        <button type="button" class="font-scale-btn" data-scale="1.2" onclick="setViewerFontScale(1.2)">120%</button>
+        <button type="button" class="font-scale-btn" data-scale="1.4" onclick="setViewerFontScale(1.4)">140%</button>
+        <button type="button" class="font-scale-btn" data-scale="1.65" onclick="setViewerFontScale(1.65)">165%</button>
+      </div>
+    </div>
+
+    <div class="pdf-options-box">
+      <div class="pdf-options-title">Kolorystyka</div>
+      <div class="pdf-tabs-row">
+        <button type="button" id="viewer-color-mode-presenter" class="pdf-tab-btn active" onclick="setViewerColorMode('presenter')">Jak u prezentera</button>
+        <button type="button" id="viewer-color-mode-custom" class="pdf-tab-btn" onclick="setViewerColorMode('custom')">Własne kolory</button>
+      </div>
+
+      <div id="viewer-custom-colors-panel" class="hidden" style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+        <label class="field">
+          <span>Gotowy motyw prezentera</span>
+          <select id="viewer-preset-select" onchange="onViewerSelectPreset(this.value)">
+            <option value="">— wybierz gotowy motyw —</option>
+          </select>
+        </label>
+        <div class="display-sheet-grid">
+          <label class="theme-item">
+            <span>Tło</span>
+            <input type="color" id="viewer-col-bg" value="#121417" onchange="onViewerCustomColorInput()" />
+          </label>
+          <label class="theme-item">
+            <span>Tekst</span>
+            <input type="color" id="viewer-col-text" value="#f9fafb" onchange="onViewerCustomColorInput()" />
+          </label>
+          <label class="theme-item">
+            <span>Akordy</span>
+            <input type="color" id="viewer-col-chord" value="#fbbf24" onchange="onViewerCustomColorInput()" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions-row">
+      <button type="button" class="btn-sm" onclick="resetViewerStylePrefs()">Przywróć domyślne</button>
+      <button type="button" class="btn-sm btn-save" onclick="closeViewerStyleModal()">Gotowe</button>
+    </div>
   </div>
 </div>
 
@@ -985,6 +1078,18 @@ input:focus, select:focus, textarea:focus {
           <input type="text" id="pl-time" class="compact-time" placeholder="GG:MM" />
           <button type="button" class="icon-trigger-btn" title="Wybierz godzinę" onclick="openTimePicker()">🕒</button>
           <input type="time" id="pl-time-picker" class="hidden-picker" onchange="onTimePickerChange(this.value)" />
+        </div>
+      </label>
+      <label class="field pl-search-field">
+        <span>Szukaj piosenki</span>
+        <div class="pl-search-input-wrap">
+          <span class="pl-search-icon" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="7"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </span>
+          <input type="text" id="pl-song-search" placeholder="Nazwa utworu..." oninput="onPlaylistSongSearchInput()" />
         </div>
       </label>
     </div>
@@ -1277,7 +1382,7 @@ let touchStartX = null;
 let touchStartY = null;
 
 const CHORD_PREFIX = '\x01';
-const TEMP_CACHE_KEY = 'songbookwifi_viewer_temp_v1';
+const VIEWER_PREFS_KEY = 'songbookwifi_viewer_prefs_v1';
 
 const DEFAULT_THEME = {
   name: 'Ciemny klasyczny',
@@ -1287,73 +1392,201 @@ const DEFAULT_THEME = {
   showChords: true
 };
 
+const DEFAULT_VIEWER_PREFS = {
+  fontScale: 0,
+  customColors: false,
+  bg: '#121417',
+  text: '#f9fafb',
+  chord: '#fbbf24',
+  selectedPreset: ''
+};
+
+function loadViewerPrefs() {
+  try {
+    const raw = localStorage.getItem(VIEWER_PREFS_KEY);
+    if (!raw) return { ...DEFAULT_VIEWER_PREFS };
+    const parsed = JSON.parse(raw);
+    return {
+      fontScale: typeof parsed.fontScale === 'number' && parsed.fontScale >= 0 ? parsed.fontScale : 0,
+      customColors: Boolean(parsed.customColors),
+      bg: parsed.bg || DEFAULT_VIEWER_PREFS.bg,
+      text: parsed.text || DEFAULT_VIEWER_PREFS.text,
+      chord: parsed.chord || DEFAULT_VIEWER_PREFS.chord,
+      selectedPreset: typeof parsed.selectedPreset === 'string' ? parsed.selectedPreset : ''
+    };
+  } catch (_) {
+    return { ...DEFAULT_VIEWER_PREFS };
+  }
+}
+
+function saveViewerPrefs() {
+  try {
+    localStorage.setItem(VIEWER_PREFS_KEY, JSON.stringify(viewerPrefs));
+  } catch (_) {}
+}
+
 let activeTheme = { ...DEFAULT_THEME };
+let viewerPrefs = loadViewerPrefs();
+let publicThemePresets = [];
+
+function getEffectiveTheme() {
+  if (currentState && !currentState.canPresent && viewerPrefs.customColors) {
+    return {
+      ...activeTheme,
+      bg: viewerPrefs.bg || activeTheme.bg,
+      text: viewerPrefs.text || activeTheme.text,
+      chord: viewerPrefs.chord || activeTheme.chord
+    };
+  }
+  return activeTheme;
+}
+
+function syncViewerStyleModalUi() {
+  const btns = document.querySelectorAll('#viewer-font-scale-group .font-scale-btn');
+  btns.forEach(btn => {
+    const s = Number(btn.getAttribute('data-scale') || '0');
+    btn.classList.toggle('active', Math.abs(s - viewerPrefs.fontScale) < 0.001);
+  });
+
+  const btnPresenter = document.getElementById('viewer-color-mode-presenter');
+  const btnCustom = document.getElementById('viewer-color-mode-custom');
+  const customPanel = document.getElementById('viewer-custom-colors-panel');
+
+  if (btnPresenter) btnPresenter.classList.toggle('active', !viewerPrefs.customColors);
+  if (btnCustom) btnCustom.classList.toggle('active', Boolean(viewerPrefs.customColors));
+  if (customPanel) customPanel.classList.toggle('hidden', !viewerPrefs.customColors);
+
+  const bgEl = document.getElementById('viewer-col-bg');
+  const textEl = document.getElementById('viewer-col-text');
+  const chordEl = document.getElementById('viewer-col-chord');
+  if (bgEl && document.activeElement !== bgEl) bgEl.value = viewerPrefs.bg;
+  if (textEl && document.activeElement !== textEl) textEl.value = viewerPrefs.text;
+  if (chordEl && document.activeElement !== chordEl) chordEl.value = viewerPrefs.chord;
+
+  const sel = document.getElementById('viewer-preset-select');
+  if (sel) {
+    sel.replaceChildren();
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = publicThemePresets.length > 0
+      ? '— wybierz gotowy motyw prezentera —'
+      : '— brak zapisanych motywów —';
+    sel.appendChild(ph);
+
+    publicThemePresets.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.name;
+      opt.textContent = t.name;
+      if (viewerPrefs.selectedPreset === t.name) {
+        opt.selected = true;
+      }
+      sel.appendChild(opt);
+    });
+  }
+
+  const styleBtn = document.getElementById('btn-viewer-style');
+  if (styleBtn) {
+    const hasCustom = viewerPrefs.fontScale > 0 || viewerPrefs.customColors;
+    styleBtn.classList.toggle('style-custom', hasCustom);
+  }
+}
+
+async function fetchPublicThemePresets() {
+  try {
+    const res = await fetch('/api/themes', { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    publicThemePresets = Array.isArray(data.themes) ? data.themes : [];
+    syncViewerStyleModalUi();
+  } catch (_) {}
+}
+
+function openViewerStyleModal() {
+  if (!currentState || currentState.canPresent) return;
+  if (!viewerPrefs.customColors) {
+    viewerPrefs.bg = activeTheme.bg;
+    viewerPrefs.text = activeTheme.text;
+    viewerPrefs.chord = activeTheme.chord;
+  }
+  syncViewerStyleModalUi();
+  fetchPublicThemePresets();
+  document.getElementById('viewer-style-modal-backdrop').classList.remove('hidden');
+}
+
+function closeViewerStyleModal() {
+  document.getElementById('viewer-style-modal-backdrop').classList.add('hidden');
+}
+
+function onViewerStyleBackdropClick(event) {
+  if (event.target && event.target.id === 'viewer-style-modal-backdrop') {
+    closeViewerStyleModal();
+  }
+}
+
+function setViewerFontScale(scale) {
+  viewerPrefs.fontScale = Number(scale) || 0;
+  saveViewerPrefs();
+  syncViewerStyleModalUi();
+  draw();
+}
+
+function setViewerColorMode(mode) {
+  const isCustom = mode === 'custom';
+  viewerPrefs.customColors = isCustom;
+  if (isCustom && !viewerPrefs.bg) {
+    viewerPrefs.bg = activeTheme.bg;
+    viewerPrefs.text = activeTheme.text;
+    viewerPrefs.chord = activeTheme.chord;
+  }
+  saveViewerPrefs();
+  syncViewerStyleModalUi();
+  draw();
+}
+
+function onViewerSelectPreset(name) {
+  if (!name) return;
+  const preset = publicThemePresets.find(t => t.name === name);
+  if (!preset) return;
+  viewerPrefs.customColors = true;
+  viewerPrefs.selectedPreset = preset.name;
+  viewerPrefs.bg = preset.bg || viewerPrefs.bg;
+  viewerPrefs.text = preset.text || viewerPrefs.text;
+  viewerPrefs.chord = preset.chord || viewerPrefs.chord;
+  saveViewerPrefs();
+  syncViewerStyleModalUi();
+  draw();
+}
+
+function onViewerCustomColorInput() {
+  const bgEl = document.getElementById('viewer-col-bg');
+  const textEl = document.getElementById('viewer-col-text');
+  const chordEl = document.getElementById('viewer-col-chord');
+  viewerPrefs.customColors = true;
+  viewerPrefs.selectedPreset = '';
+  if (bgEl && bgEl.value) viewerPrefs.bg = bgEl.value;
+  if (textEl && textEl.value) viewerPrefs.text = textEl.value;
+  if (chordEl && chordEl.value) viewerPrefs.chord = chordEl.value;
+  saveViewerPrefs();
+  syncViewerStyleModalUi();
+  draw();
+}
+
+function resetViewerStylePrefs() {
+  viewerPrefs = {
+    ...DEFAULT_VIEWER_PREFS,
+    bg: activeTheme.bg,
+    text: activeTheme.text,
+    chord: activeTheme.chord
+  };
+  saveViewerPrefs();
+  syncViewerStyleModalUi();
+  draw();
+}
 
 function clampFourDigits(inputEl) {
   if (!inputEl) return;
   const raw = String(inputEl.value || '').replace(/\D+/g, '').slice(0, 4);
   inputEl.value = raw;
-}
-
-function loadViewerTempCache() {
-  try {
-    const raw = sessionStorage.getItem(TEMP_CACHE_KEY);
-    if (!raw) return { songs: {}, playlists: {} };
-    const parsed = JSON.parse(raw);
-    return {
-      songs: parsed && typeof parsed.songs === 'object' ? parsed.songs : {},
-      playlists: parsed && typeof parsed.playlists === 'object' ? parsed.playlists : {}
-    };
-  } catch (_) {
-    return { songs: {}, playlists: {} };
-  }
-}
-
-function saveViewerTempCache(cacheObj) {
-  try {
-    sessionStorage.setItem(TEMP_CACHE_KEY, JSON.stringify(cacheObj));
-  } catch (_) {}
-}
-
-function recordParticipantTempBuffer(state) {
-  if (!state || !state.songTitle) return;
-  const songKey = state.filename || state.songTitle;
-  const cache = loadViewerTempCache();
-
-  const existingSong = cache.songs[songKey] || {
-    title: state.songTitle,
-    slides: {}
-  };
-  existingSong.title = state.songTitle;
-
-  const formattedSlide = formatReadableLyricsWithChords(state.slideText || '');
-  const slideKey = String(state.slideIndex ?? 0);
-  if (formattedSlide) {
-    existingSong.slides[slideKey] = formattedSlide;
-  }
-
-  const orderedText = Object.keys(existingSong.slides)
-    .sort((a, b) => Number(a) - Number(b))
-    .map(k => existingSong.slides[k])
-    .filter(Boolean)
-    .join('\n\n');
-
-  existingSong.formattedTxt = `${state.songTitle}\n\n${orderedText}`.trim() + '\n';
-  cache.songs[songKey] = existingSong;
-
-  if (state.playlistName) {
-    const plKey = state.playlistName;
-    const plEntry = cache.playlists[plKey] || {
-      name: state.playlistName,
-      schedule: state.playlistSchedule || '',
-      songs: {}
-    };
-    plEntry.schedule = state.playlistSchedule || plEntry.schedule || '';
-    plEntry.songs[songKey] = existingSong.formattedTxt;
-    cache.playlists[plKey] = plEntry;
-  }
-
-  saveViewerTempCache(cache);
 }
 
 function askAppConfirm(title, message, okLabel = 'Usuń', okClass = 'btn-sm btn-danger-inline') {
@@ -1449,45 +1682,6 @@ function formatReadableLyricsWithChords(rawLyricsOrSlide) {
     }
   }
   return outLines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
-}
-
-function buildPlainSongText(state) {
-  if (!state) return '';
-  const songKey = state.filename || state.songTitle || '';
-  const cache = loadViewerTempCache();
-  const cachedSong = songKey && cache.songs[songKey];
-
-  if (cachedSong && cachedSong.formattedTxt) {
-    return cachedSong.formattedTxt;
-  }
-
-  const headerLines = [];
-  if (state.songTitle) headerLines.push(state.songTitle);
-  const metaParts = [];
-  if (state.song && state.song.key) metaParts.push(`Tonacja: ${state.song.key}`);
-  if (state.song && state.song.tempo) metaParts.push(`Tempo: ${state.song.tempo}`);
-  if (state.song && state.song.time_sig) metaParts.push(`Metrum: ${state.song.time_sig}`);
-  if (metaParts.length > 0) headerLines.push(metaParts.join(' | '));
-
-  const rawBody = (state.song && state.song.lyrics) ? state.song.lyrics : (state.slideText || '');
-  const formattedBody = formatReadableLyricsWithChords(rawBody);
-  return [...headerLines, '', formattedBody].join('\n').trim() + '\n';
-}
-
-function downloadCurrentSongAsTxt() {
-  if (!currentState) return;
-  recordParticipantTempBuffer(currentState);
-  const textContent = buildPlainSongText(currentState);
-  const baseName = sanitizeFileBaseName(currentState.songTitle || currentState.filename || 'piesn');
-  const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${baseName}.txt`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function toAsciiPdfText(str) {
@@ -2494,6 +2688,8 @@ function resetPlaylistForm() {
   document.getElementById('pl-name').value = '';
   document.getElementById('pl-date').value = now.toISOString().slice(0, 10);
   document.getElementById('pl-time').value = now.toTimeString().slice(0, 5);
+  const searchEl = document.getElementById('pl-song-search');
+  if (searchEl) searchEl.value = '';
   draftPlaylistSongs = [];
   setPlaylistStatus('', false);
   renderPlaylistEditorList();
@@ -2546,32 +2742,55 @@ async function deleteSelectedPlaylist() {
   }
 }
 
+function onPlaylistSongSearchInput() {
+  renderPlaylistSongLists();
+}
+
 function renderPlaylistSongLists() {
   const availEl = document.getElementById('pl-available-list');
   const selEl = document.getElementById('pl-selected-list');
   if (!availEl || !selEl) return;
 
-  availEl.replaceChildren();
-  catalogSongs.forEach(song => {
-    const row = document.createElement('div');
-    row.className = 'pl-row';
+  const rawQuery = (document.getElementById('pl-song-search')?.value || '').toLowerCase().trim();
+  const words = rawQuery ? rawQuery.split(/\s+/) : [];
 
-    const label = document.createElement('span');
-    label.textContent = song.title || song.filename;
-
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.className = 'btn-sm btn-save';
-    addBtn.textContent = 'Dodaj';
-    addBtn.onclick = () => {
-      draftPlaylistSongs.push(song.filename);
-      renderPlaylistSongLists();
-    };
-
-    row.appendChild(label);
-    row.appendChild(addBtn);
-    availEl.appendChild(row);
+  const filteredSongs = catalogSongs.filter(song => {
+    if (words.length === 0) return true;
+    const titleHay = (song.title || '').toLowerCase();
+    const fileHay = (song.filename || '').toLowerCase();
+    return words.every(w => titleHay.includes(w) || fileHay.includes(w));
   });
+
+  availEl.replaceChildren();
+  if (filteredSongs.length === 0) {
+    const emptyAvail = document.createElement('div');
+    emptyAvail.className = 'song-item-sub';
+    emptyAvail.textContent = words.length > 0
+      ? 'Brak utworów pasujących do wyszukiwanej nazwy.'
+      : 'Brak dostępnych utworów.';
+    availEl.appendChild(emptyAvail);
+  } else {
+    filteredSongs.forEach(song => {
+      const row = document.createElement('div');
+      row.className = 'pl-row';
+
+      const label = document.createElement('span');
+      label.textContent = song.title || song.filename;
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn-sm btn-save';
+      addBtn.textContent = 'Dodaj';
+      addBtn.onclick = () => {
+        draftPlaylistSongs.push(song.filename);
+        renderPlaylistSongLists();
+      };
+
+      row.appendChild(label);
+      row.appendChild(addBtn);
+      availEl.appendChild(row);
+    });
+  }
 
   selEl.replaceChildren();
   if (draftPlaylistSongs.length === 0) {
@@ -2742,7 +2961,6 @@ function updateViewerControls() {
   const menuBar = document.getElementById('viewer-menu-bar');
   const floatBtn = document.getElementById('btn-viewer-present-float');
   const viewerBtn = document.getElementById('btn-viewer-chords');
-  const dlBtn = document.getElementById('btn-viewer-download');
 
   const isViewerOnStage = Boolean(currentState && !currentState.canPresent && !isAnySubViewOpen());
   if (menuBar) {
@@ -2759,9 +2977,7 @@ function updateViewerControls() {
       ? 'Akordy włączone u Ciebie — kliknij, aby ukryć'
       : 'Akordy ukryte — kliknij, aby włączyć u siebie';
   }
-  if (dlBtn) {
-    dlBtn.disabled = !currentState || !currentState.songTitle;
-  }
+  syncViewerStyleModalUi();
 }
 
 function toggleViewerPresentationMode() {
@@ -2810,6 +3026,7 @@ async function loadThemesList() {
     const res = await fetch('/api/themes', { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
+    publicThemePresets = Array.isArray(data.themes) ? data.themes : [];
     const sel = document.getElementById('theme-select');
     if (!sel) return;
     sel.replaceChildren();
@@ -3058,6 +3275,7 @@ async function shutdownProgram() {
   closeDisplayModal();
   closePdfExportModal();
   closeAddToPlaylistModal();
+  closeViewerStyleModal();
   currentState = null;
   updateBottomBar(null, false);
   document.getElementById('meta').textContent = 'Program został zamknięty.';
@@ -3321,8 +3539,12 @@ function draw() {
   const h = rect.height;
   if (!w || !h) return;
 
+  const themeToUse = getEffectiveTheme();
+  const isParticipantCustomFont =
+    !currentState.canPresent && typeof viewerPrefs.fontScale === 'number' && viewerPrefs.fontScale > 0;
+
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = activeTheme.bg;
+  ctx.fillStyle = themeToUse.bg;
   ctx.fillRect(0, 0, w, h);
 
   const compact = w < 600 || h < 450;
@@ -3352,13 +3574,26 @@ function draw() {
   const slideBottom = footerY - footerSize * 1.5;
   const availableHeight = Math.max(40, slideBottom - slideTop);
 
-  let fontSize = Math.max(16, Math.min(compact ? 32 : 44, w * 0.075, h * 0.11));
+  const autoBaseSize = Math.max(16, Math.min(compact ? 32 : 44, w * 0.075, h * 0.11));
+  let fontSize = autoBaseSize;
   let lines = [];
-  for (; fontSize >= 16; fontSize -= 1) {
-    ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
-    lines = prepareSlideLines(currentState.slideText || '', w - sidePadding * 2);
-    const lineHeight = fontSize * 1.3;
-    if (lines.length * lineHeight <= availableHeight) break;
+
+  if (isParticipantCustomFont) {
+    const desired = Math.max(13, Math.min(120, Math.round(autoBaseSize * viewerPrefs.fontScale)));
+    fontSize = desired;
+    for (; fontSize >= 13; fontSize -= 1) {
+      ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
+      lines = prepareSlideLines(currentState.slideText || '', w - sidePadding * 2);
+      const lineHeight = fontSize * 1.3;
+      if (lines.length * lineHeight <= availableHeight || fontSize <= 13) break;
+    }
+  } else {
+    for (; fontSize >= 16; fontSize -= 1) {
+      ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
+      lines = prepareSlideLines(currentState.slideText || '', w - sidePadding * 2);
+      const lineHeight = fontSize * 1.3;
+      if (lines.length * lineHeight <= availableHeight) break;
+    }
   }
 
   const lineHeight = fontSize * 1.3;
@@ -3366,9 +3601,9 @@ function draw() {
   const startY = slideTop + Math.max(0, (availableHeight - textHeight) / 2) + lineHeight / 2;
   lines.forEach((line, index) => {
     ctx.font = line.isChord
-      ? `700 ${Math.max(14, Math.round(fontSize * 0.85))}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`
+      ? `700 ${Math.max(13, Math.round(fontSize * 0.85))}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`
       : `600 ${fontSize}px system-ui, sans-serif`;
-    ctx.fillStyle = line.isChord ? activeTheme.chord : activeTheme.text;
+    ctx.fillStyle = line.isChord ? themeToUse.chord : themeToUse.text;
     ctx.fillText(line.text, w / 2, startY + index * lineHeight, w - sidePadding * 2);
   });
 }
@@ -3378,10 +3613,6 @@ function renderToolbar(state, forceTimerReset = false) {
   updateUiVisibility();
   updateBottomBar(state, true);
   resetAutoTimer(state, forceTimerReset);
-
-  if (state && !state.canPresent) {
-    recordParticipantTempBuffer(state);
-  }
 
   const plLabel = document.getElementById('active-playlist-label');
   if (plLabel) {
@@ -3679,6 +3910,7 @@ window.addEventListener('keydown', event => {
     closeDisplayModal();
     closePdfExportModal();
     closeAddToPlaylistModal();
+    closeViewerStyleModal();
     return;
   }
   if (!currentState || !currentState.canPresent || isAnySubViewOpen()) return;
@@ -3697,6 +3929,7 @@ if ('ResizeObserver' in window) {
   resizeObserver.observe(canvas);
 }
 
+syncViewerStyleModalUi();
 refreshState();
 setInterval(refreshState, 1000);
 </script>
