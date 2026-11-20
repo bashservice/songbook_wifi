@@ -1,3 +1,4 @@
+
 # Śpiewnik Wifi 🎵
 
 **Śpiewnik Wifi** to lekka, desktopowa aplikacja napisaną w języku **Rust** przy użyciu frameworka **egui** (eframe). Narzędzie służy do zarządzania bazą utworów/pieśni, edycji ich tekstów, akordów oraz prowadzenia dynamicznych prezentacji (np. wyświetlania tekstów na rzutnik podczas nabożeństw lub spotkań śpiewaczych).
@@ -20,8 +21,12 @@
   * Responsywny podgląd slajdu o proporcjach 16:9 z wyśrodkowanym tekstem.
   * Opcja ukrywania/pokazywania linii akordów (linie zaczynające się od kropki `.`).
   * Automatyczna zmiana slajdów w zdefiniowanym przedziale czasowym lub sterowanie ręczne (strzałki `←` / `→` bądź kliknięcie w podgląd)
+ 
+    [demo_songbook_wifi.webm](https://github.com/user-attachments/assets/71c32ed5-404a-43b9-82f2-cbd41af39245)
 
 Lekki serwer prezentacji pieśni i tekstów z akordami w języku **Rust**, udostępniający panel prowadzącego na komputerze lokalnym oraz podgląd na żywo dla uczestników po sieci Wi-Fi / LAN (przez przeglądarkę).
+
+
 ## 🛠 Wymagania wstępne
 
 Aby skompilować i uruchomić projekt, musisz posiadać zainstalowane środowisko języka **Rust** (zalecana wersja z edycją 2024 lub nowszą).
