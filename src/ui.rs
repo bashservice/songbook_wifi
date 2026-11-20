@@ -72,6 +72,14 @@ body {
   background: #232838;
   border-color: #6366f1;
 }
+.icon-nav-btn.nav-pdf {
+  background: #450a0a;
+  border-color: #ef4444;
+  color: #fecaca;
+}
+.icon-nav-btn.nav-pdf:hover {
+  background: #7f1d1d;
+}
 .icon-nav-btn.srv-power-btn {
   margin-left: auto;
   background: #14532d;
@@ -93,6 +101,7 @@ body {
   align-items: center;
   justify-content: center;
   border-top: 1px solid #2b323d;
+  min-height: 76px;
 }
 .player-status-row {
   display: flex;
@@ -146,6 +155,27 @@ button.btn-danger-inline {
 button.btn-danger-inline:hover:not(:disabled) {
   background: #7f1d1d;
 }
+button.btn-pdf-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #7f1d1d;
+  border-color: #ef4444;
+  color: #fee2e2;
+  font-weight: 600;
+}
+button.btn-pdf-action:hover:not(:disabled) {
+  background: #991b1b;
+}
+button.btn-pl-add {
+  background: #1e3a5f;
+  border-color: #3b82f6;
+  color: #dbeafe;
+  font-weight: 600;
+}
+button.btn-pl-add:hover:not(:disabled) {
+  background: #1d4ed8;
+}
 button.btn-sm {
   padding: 6px 10px;
   font-size: 12px;
@@ -170,62 +200,86 @@ button.btn-transport.paused {
   border-color: #f59e0b;
   color: #fef3c7;
 }
-.transport-group {
+button.btn-chords-toggle {
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1;
+  min-width: 42px;
+  min-height: 40px;
+  padding: 8px 11px;
+  background: #1e3a5f;
+  border-color: #60a5fa;
+  color: #f8fafc;
+}
+button.btn-chords-toggle.chords-hidden {
+  background: rgba(30, 41, 59, 0.25);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: rgba(226, 232, 240, 0.45);
+}
+#stage-wrap {
+  position: relative;
+  flex: 1 1 auto;
   display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+.viewer-menu-bar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(24, 28, 34, 0.92);
+  border-bottom: 1px solid rgba(55, 65, 81, 0.65);
+  z-index: 20;
+}
+button.viewer-tool-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  width: 100%;
+  min-width: 36px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  background: #252c37;
+  border: 1px solid #3d4756;
+  color: #f8fafc;
 }
-button.btn-srv-stop {
-  background: #7f1d1d;
-  border-color: #ef4444;
-  font-weight: 700;
-  min-height: 40px;
-  padding: 8px 12px;
-  font-size: 12px;
+button.viewer-tool-btn.chords-on {
+  background: #1e3a5f;
+  border-color: #60a5fa;
+  color: #f8fafc;
 }
-button.btn-srv-start {
-  background: #14532d;
-  border-color: #22c55e;
-  font-weight: 700;
-  min-height: 40px;
-  padding: 8px 12px;
-  font-size: 12px;
+button.viewer-tool-btn.chords-hidden {
+  background: rgba(30, 41, 59, 0.35);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: rgba(226, 232, 240, 0.5);
 }
-.playlist-chip {
-  font-size: 12px;
-  color: #93c5fd;
-  background: #152238;
-  border: 1px solid #2b4c7e;
-  padding: 3px 9px;
-  border-radius: 999px;
-}
-.ip-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
-  color: #cbd5e1;
-  word-break: break-all;
-  text-align: center;
-}
-.auto-badge {
-  font-size: 12px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: #1e293b;
-  border: 1px solid #38bdf8;
-  color: #7dd3fc;
-  font-weight: 700;
-}
-.meta-inline {
-  font-size: 12px;
-  color: #9ca3af;
+button.viewer-present-float {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: rgba(24, 28, 34, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: rgba(243, 244, 246, 0.78);
 }
 #stage {
   flex: 1 1 auto;
   display: block;
   width: 100%;
+  height: 100%;
   min-height: 0;
   touch-action: pan-y;
 }
@@ -238,32 +292,104 @@ button.btn-srv-start {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 14px;
+  padding: 10px;
   overflow-y: auto;
   touch-action: pan-y;
+}
+.confirm-modal-backdrop {
+  z-index: 1200;
 }
 .qr-modal {
   background: #1b2028;
   border: 1px solid #3b4656;
   border-radius: 12px;
-  padding: 16px 18px;
-  max-width: 440px;
+  padding: 14px 14px;
+  max-width: 460px;
   width: 100%;
-  max-height: 90dvh;
+  max-height: 92dvh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 10px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
   touch-action: pan-y;
 }
+.confirm-modal {
+  max-width: 340px;
+  padding: 14px;
+  gap: 10px;
+}
+.confirm-modal-msg {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e2e8f0;
+  text-align: center;
+  word-break: break-word;
+}
+.confirm-actions-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+.confirm-actions-row button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 8px 10px;
+}
 .qr-modal-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #f3f4f6;
   text-align: center;
+}
+.pdf-tabs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pdf-tab-btn.active {
+  background: #1e3a5f;
+  border-color: #60a5fa;
+  color: #eff6ff;
+  font-weight: 700;
+}
+.pdf-options-box {
+  background: #161a20;
+  border: 1px solid #2b323d;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pdf-options-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+.pdf-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.pdf-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+.qr-url-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .qr-modal-url {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -271,6 +397,23 @@ button.btn-srv-start {
   color: #93c5fd;
   word-break: break-all;
   text-align: center;
+}
+.copy-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #252c37;
+  border: 1px solid #3d4756;
+  color: #e2e8f0;
+}
+.copy-icon-btn.copied {
+  background: #14532d;
+  border-color: #22c55e;
+  color: #dcfce7;
 }
 .qr-canvas-box {
   background: #ffffff;
@@ -306,10 +449,6 @@ button.btn-srv-start {
   color: #e2e8f0;
   font-size: 13px;
 }
-.theme-item.span-2 {
-  grid-column: span 2;
-  justify-content: flex-start;
-}
 .theme-item input[type="color"] {
   width: 32px;
   height: 26px;
@@ -317,11 +456,6 @@ button.btn-srv-start {
   border: 1px solid #3d4756;
   border-radius: 5px;
   background: transparent;
-  cursor: pointer;
-}
-.theme-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
   cursor: pointer;
 }
 .theme-preset-row {
@@ -334,39 +468,77 @@ button.btn-srv-start {
 }
 .modal-actions-row {
   display: flex;
-  gap: 8px;
-  justify-content: space-between;
+  gap: 6px;
+  justify-content: flex-end;
   flex-wrap: wrap;
 }
 .pl-picker-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 280px;
+  gap: 6px;
+  height: 180px;
+  min-height: 180px;
+  max-height: 180px;
+  flex: 0 0 180px;
   overflow-y: auto;
   touch-action: pan-y;
 }
 .pl-picker-item {
+  width: 100%;
   text-align: left;
   background: #232a35;
   border: 1px solid #364152;
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
+  flex: 0 0 auto;
 }
-.pl-picker-item.selected {
+.pl-picker-item:hover,
+.pl-picker-item.previewed {
   border-color: #60a5fa;
   background: #1e3a5f;
 }
+.pl-picker-item.selected {
+  border-color: #22c55e;
+}
 .pl-picker-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
 }
 .pl-picker-meta {
-  font-size: 12px;
+  font-size: 11px;
   color: #9ca3af;
+}
+.pl-hover-preview {
+  background: #161a20;
+  border: 1px solid #2b323d;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 125px;
+  min-height: 125px;
+  max-height: 125px;
+  flex: 0 0 125px;
+  overflow-y: auto;
+}
+.pl-hover-preview-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #93c5fd;
+  flex: 0 0 auto;
+}
+.pl-hover-song-line {
+  font-size: 12px;
+  color: #e2e8f0;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.45);
+}
+.pl-hover-song-line:last-child {
+  border-bottom: none;
 }
 
 #playlist-editor-view,
@@ -437,12 +609,12 @@ button.btn-srv-start {
   margin-top: 2px;
 }
 .song-editor {
-  padding: 14px 18px 28px;
+  padding: 12px 16px 26px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-height: 0;
   touch-action: pan-y;
 }
@@ -468,8 +640,33 @@ button.btn-srv-start {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px 10px;
 }
+.compact-meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  background: #161a20;
+  border: 1px solid #2b323d;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.compact-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+.compact-meta-item input {
+  padding: 6px 7px;
+  font-size: 13px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.w-5ch { width: 72px; }
+.w-4ch { width: 64px; }
 .pl-datetime-row {
   display: flex;
   align-items: flex-end;
@@ -563,13 +760,13 @@ input[type="text"], input[type="number"], select, textarea {
   color: #f3f4f6;
   border: 1px solid #3d4756;
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 7px 10px;
   font-size: 14px;
   font-family: inherit;
   touch-action: manipulation;
 }
 textarea {
-  min-height: 220px;
+  min-height: 200px;
   resize: vertical;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   line-height: 1.45;
@@ -583,8 +780,7 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 18px;
-  font-size: 14px;
+  font-size: 13px;
 }
 .editor-actions {
   display: flex;
@@ -602,19 +798,13 @@ input:focus, select:focus, textarea:focus {
 .status-err { color: #f87171; }
 
 @media (max-width: 820px) {
-  html, body {
-    height: auto;
-    min-height: 100dvh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-  }
   #playlist-editor-view,
   #songs-view {
     display: flex;
     flex-direction: column;
-    overflow: visible;
-    flex: 1 0 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto;
   }
   .songs-sidebar {
     border-right: none;
@@ -631,7 +821,8 @@ input:focus, select:focus, textarea:focus {
     flex: 0 0 auto;
   }
   .form-grid,
-  .pl-lists-grid {
+  .pl-lists-grid,
+  .pdf-options-grid {
     grid-template-columns: 1fr;
   }
   .span-2, .span-3 { grid-column: span 1; }
@@ -677,12 +868,21 @@ input:focus, select:focus, textarea:focus {
     <span class="nav-label">Playlisty</span>
   </button>
 
-  <button type="button" id="btn-display-modal" class="icon-nav-btn nav-display hidden" title="Prezentacja i motyw" onclick="openDisplayModal()">
+  <button type="button" id="btn-display-modal" class="icon-nav-btn nav-display hidden" title="Prezentacja i motyw" onclick="handlePresentationIconClick()">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <rect x="7" y="2" width="10" height="20" rx="2"/>
       <line x1="11" y1="18" x2="13" y2="18"/>
     </svg>
     <span class="nav-label">Prezentacja</span>
+  </button>
+
+  <button type="button" id="btn-pdf-export" class="icon-nav-btn nav-pdf hidden" title="Eksport PDF (piosenka lub playlista)" onclick="openPdfExportModal()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="6.5" font-weight="800">PDF</text>
+    </svg>
+    <span class="nav-label">PDF</span>
   </button>
 
   <button type="button" id="btn-qr" class="icon-nav-btn hidden" title="Kod QR" onclick="openQrModal()">
@@ -706,7 +906,31 @@ input:focus, select:focus, textarea:focus {
   </button>
 </div>
 
-<canvas id="stage"></canvas>
+<div id="stage-wrap">
+  <div id="viewer-menu-bar" class="viewer-menu-bar hidden" aria-label="Menu uczestnika">
+    <button type="button" id="btn-viewer-present" class="viewer-tool-btn" title="Tryb prezentacji (ukryj menu)" onclick="toggleViewerPresentationMode()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z"/>
+      </svg>
+    </button>
+    <button type="button" id="btn-viewer-chords" class="viewer-tool-btn chords-hidden" title="Akordy ukryte — kliknij, aby włączyć u siebie" onclick="toggleViewerChords()">A</button>
+    <button type="button" id="btn-viewer-download" class="viewer-tool-btn" title="Pobierz buforowany tekst utworu (.txt)" onclick="downloadCurrentSongAsTxt()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
+        <path d="M12 4v12"/>
+        <path d="m7 11 5 5 5-5"/>
+        <path d="M5 20h14"/>
+      </svg>
+    </button>
+  </div>
+  <button type="button" id="btn-viewer-present-float" class="viewer-present-float hidden" title="Pokaż menu uczestnika" onclick="toggleViewerPresentationMode()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+  </button>
+  <canvas id="stage"></canvas>
+</div>
 
 <div id="player-bar" class="player-bar hidden">
   <div class="player-status-row">
@@ -718,6 +942,7 @@ input:focus, select:focus, textarea:focus {
     <button type="button" id="btn-prev" class="btn-transport" title="Wstecz" onclick="manualStep('prev')">|◄</button>
     <button type="button" id="btn-pause" class="btn-transport" title="Pauza / Wznów automat i listę" onclick="togglePlaybackPause()">❚❚</button>
     <button type="button" id="btn-next" class="btn-transport" title="Dalej" onclick="manualStep('next')">►</button>
+    <button type="button" id="btn-chords-toggle" class="btn-chords-toggle" title="Pokaż / ukryj akordy" onclick="toggleChordsVisibility()">A</button>
     <button type="button" id="btn-srv-toggle" class="btn-srv-stop" onclick="toggleServerState()">● [Stop]</button>
   </div>
 </div>
@@ -736,7 +961,6 @@ input:focus, select:focus, textarea:focus {
   <section class="song-editor">
     <div class="editor-header">
       <h2 id="pl-editor-heading">Tworzenie playlisty</h2>
-      <button type="button" onclick="closePlaylistEditor()">← Powrót do prezentacji</button>
     </div>
 
     <div class="form-grid">
@@ -780,7 +1004,7 @@ input:focus, select:focus, textarea:focus {
 
     <div class="editor-actions">
       <button type="button" class="btn-save" onclick="savePlaylist()">Zapisz</button>
-      <button type="button" onclick="closePlaylistEditor()">Anuluj</button>
+      <button type="button" onclick="returnToPresentationView()">Anuluj</button>
     </div>
   </section>
 </div>
@@ -806,45 +1030,47 @@ input:focus, select:focus, textarea:focus {
         <input type="text" id="f-title" placeholder="np. Abba Ojcze - Ty wyzwoliłeś nas Panie" />
       </label>
       <label class="field">
-        <span>Numer pieśni (hymn_number)</span>
-        <input type="text" id="f-hymn-number" placeholder="np. 142" />
-      </label>
-
-      <label class="field span-2">
         <span>Autor (author)</span>
         <input type="text" id="f-author" placeholder="np. J. Sykulski Jan Góra" />
       </label>
-      <label class="field">
-        <span>Tonacja (key)</span>
-        <input type="text" id="f-key" placeholder="np. C-dur" />
-      </label>
+    </div>
 
-      <label class="field">
-        <span>Metrum (time_sig)</span>
-        <input type="text" id="f-time-sig" placeholder="np. 4/4" />
+    <div class="compact-meta-strip" aria-label="Parametry informacyjne utworu">
+      <label class="compact-meta-item">
+        <span>Nr (≤5)</span>
+        <input type="text" id="f-hymn-number" class="w-5ch" maxlength="5" placeholder="1002" />
       </label>
-      <label class="field">
-        <span>Tempo (tempo)</span>
-        <input type="text" id="f-tempo" placeholder="np. 110" />
+      <label class="compact-meta-item">
+        <span>Tonacja (≤5)</span>
+        <input type="text" id="f-key" class="w-5ch" maxlength="5" placeholder="C-dur" />
       </label>
-      <label class="field">
-        <span>Kolejność slajdów (presentation) — np. V1.12 C1.10 V2</span>
-        <input type="text" id="f-presentation" placeholder="np. V1.12 C1.10 V2 V3 V4" />
+      <label class="compact-meta-item">
+        <span>Metrum (≤5)</span>
+        <input type="text" id="f-time-sig" class="w-5ch" maxlength="5" placeholder="4/4" />
       </label>
-
-      <label class="field">
-        <span>Domyślny czas slajdu (slide_seconds)</span>
-        <input type="number" id="f-slide-seconds" min="0" value="10" />
+      <label class="compact-meta-item">
+        <span>Tempo (≤4)</span>
+        <input type="text" id="f-tempo" class="w-4ch" maxlength="4" placeholder="110" />
       </label>
-      <label class="field">
-        <span>Pauza przed kolejnym utworem (next_song_delay_seconds)</span>
-        <input type="number" id="f-next-song-delay" min="0" value="3" />
+      <label class="compact-meta-item">
+        <span>Slajd s (≤4)</span>
+        <input type="number" id="f-slide-seconds" class="w-4ch" min="0" max="9999" value="10" oninput="clampFourDigits(this)" />
+      </label>
+      <label class="compact-meta-item">
+        <span>Pauza s (≤4)</span>
+        <input type="number" id="f-next-song-delay" class="w-4ch" min="0" max="9999" value="3" oninput="clampFourDigits(this)" />
       </label>
       <div class="checkbox-row">
         <input type="checkbox" id="f-automatic" />
-        <label for="f-automatic">Automatyczne przełączanie slajdów (automatic)</label>
+        <label for="f-automatic">Auto slajdy</label>
       </div>
+    </div>
 
+    <div class="form-grid">
+      <label class="field span-3">
+        <span>Kolejność slajdów (presentation) — np. V1.12 C1.10 V2</span>
+        <input type="text" id="f-presentation" placeholder="np. V1 V2 V3 V4" />
+      </label>
       <label class="field span-3">
         <span>Tekst i sekcje (lyrics) * — sekcje np. [V1], [C1], linie akordów zaczynaj od kropki (.)</span>
         <textarea id="f-lyrics" placeholder="[V1]&#10;.C       F         G C&#10; Ty wyzwoliłeś nas Panie..."></textarea>
@@ -854,11 +1080,95 @@ input:focus, select:focus, textarea:focus {
     <div id="editor-status" class="status-msg"></div>
 
     <div class="editor-actions">
-      <button class="btn-save" onclick="saveCurrentSong()">Zapisz</button>
-      <button onclick="cancelEditing()">Anuluj</button>
-      <button id="btn-delete-song" class="btn-danger-inline" onclick="deleteCurrentSong()">Usuń</button>
+      <button type="button" class="btn-save" onclick="saveCurrentSong()">Zapisz</button>
+      <button type="button" onclick="cancelEditing()">Anuluj</button>
+      <button type="button" class="btn-pdf-action" title="Pobierz PDF tej piosenki (z wyborem parametrów)" onclick="openEditorSongPdfModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <text x="12" y="17" text-anchor="middle" fill="currentColor" stroke="none" font-size="6.5" font-weight="800">PDF</text>
+        </svg>
+        <span>PDF</span>
+      </button>
+      <button type="button" class="btn-pl-add" onclick="openAddCurrentSongToPlaylistModal()">+ Dodaj do playlisty</button>
+      <button type="button" id="btn-delete-song" class="btn-danger-inline" onclick="deleteCurrentSong()">Usuń</button>
     </div>
   </section>
+</div>
+
+<div id="confirm-modal-backdrop" class="qr-modal-backdrop confirm-modal-backdrop hidden" onclick="onConfirmBackdropClick(event)">
+  <div class="qr-modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+    <h3 id="confirm-modal-title" class="qr-modal-title">Potwierdzenie</h3>
+    <div id="confirm-modal-msg" class="confirm-modal-msg"></div>
+    <div class="confirm-actions-row">
+      <button type="button" id="btn-confirm-cancel" class="btn-sm" onclick="resolveAppConfirm(false)">Anuluj</button>
+      <button type="button" id="btn-confirm-ok" class="btn-sm btn-danger-inline" onclick="resolveAppConfirm(true)">Usuń</button>
+    </div>
+  </div>
+</div>
+
+<div id="pdf-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onPdfModalBackdropClick(event)">
+  <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="pdf-modal-title">
+    <h3 id="pdf-modal-title" class="qr-modal-title">Parametry drukowania PDF</h3>
+    <div id="pdf-tabs-container" class="pdf-tabs-row">
+      <button type="button" id="pdf-tab-song" class="pdf-tab-btn active" onclick="switchPdfExportMode('song')">Pojedyncza piosenka</button>
+      <button type="button" id="pdf-tab-playlist" class="pdf-tab-btn" onclick="switchPdfExportMode('playlist')">Cała playlista</button>
+    </div>
+
+    <div id="pdf-song-panel" class="pl-picker-list">
+      <input type="text" id="pdf-song-search" placeholder="Szukaj po słowach w tytule..." oninput="renderPdfSongPicker()" />
+      <div id="pdf-song-list" class="pl-picker-list"></div>
+    </div>
+
+    <div id="pdf-playlist-panel" class="pl-picker-list hidden">
+      <div id="pdf-playlist-list" class="pl-picker-list"></div>
+    </div>
+
+    <div class="pdf-options-box">
+      <div class="pdf-options-title">Ustawienia układu i czcionki</div>
+      <div class="pdf-options-grid">
+        <label class="field">
+          <span>Wielkość czcionki</span>
+          <select id="pdf-font-size">
+            <option value="small">Mała (więcej tekstu na kartce)</option>
+            <option value="medium" selected>Średnia (domyślna)</option>
+            <option value="large">Duża (łatwiejszy odczyt)</option>
+          </select>
+        </label>
+        <div class="checkbox-row" style="padding-top: 14px;">
+          <label class="pdf-check-label">
+            <input type="checkbox" id="pdf-two-columns" />
+            <span>W dwóch kolumnach</span>
+          </label>
+        </div>
+      </div>
+      <div id="pdf-each-song-page-row" class="hidden">
+        <label class="pdf-check-label">
+          <input type="checkbox" id="pdf-each-song-new-page" />
+          <span>Każda piosenka na osobnej kartce</span>
+        </label>
+      </div>
+    </div>
+
+    <div id="pdf-modal-status" class="qr-status-text"></div>
+    <div class="modal-actions-row">
+      <button type="button" class="btn-sm btn-pdf-action" onclick="confirmPdfExport()">Pobierz PDF</button>
+      <button type="button" class="btn-sm" onclick="closePdfExportModal()">Zamknij</button>
+    </div>
+  </div>
+</div>
+
+<div id="add-to-pl-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onAddToPlaylistBackdropClick(event)">
+  <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="add-to-pl-title">
+    <h3 id="add-to-pl-title" class="qr-modal-title">Dodaj piosenkę do playlisty</h3>
+    <div id="add-to-pl-song-label" class="pl-picker-meta"></div>
+    <div id="add-to-pl-list" class="pl-picker-list"></div>
+    <div id="add-to-pl-status" class="qr-status-text"></div>
+    <div class="modal-actions-row">
+      <button type="button" class="btn-sm btn-save" onclick="confirmAddSongToSelectedPlaylist()">Dodaj</button>
+      <button type="button" class="btn-sm" onclick="closeAddToPlaylistModal()">Anuluj</button>
+    </div>
+  </div>
 </div>
 
 <div id="display-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onDisplayBackdropClick(event)">
@@ -878,10 +1188,6 @@ input:focus, select:focus, textarea:focus {
         <span>Akordy</span>
         <input type="color" id="col-chord" value="#fbbf24" onchange="onThemeChange()" />
       </label>
-      <label class="theme-item" title="Pokazuj lub ukryj linie akordów">
-        <span>Akordy widoczne</span>
-        <input type="checkbox" id="chk-show-chords" checked onchange="onThemeChange()" />
-      </label>
     </div>
     <div class="theme-preset-row">
       <input type="text" id="theme-name" placeholder="Nazwa motywu..." />
@@ -891,7 +1197,6 @@ input:focus, select:focus, textarea:focus {
       <option value="">Wybierz motyw...</option>
     </select>
     <div class="modal-actions-row">
-      <button type="button" class="btn-sm" onclick="copyWifiAddress()">Kopiuj adres Wi-Fi</button>
       <button type="button" class="btn-sm" onclick="closeDisplayModal()">Zamknij</button>
     </div>
   </div>
@@ -900,7 +1205,16 @@ input:focus, select:focus, textarea:focus {
 <div id="qr-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onQrBackdropClick(event)">
   <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
     <h3 id="qr-modal-title" class="qr-modal-title">Kod QR dla uczestników</h3>
-    <div id="qr-modal-url" class="qr-modal-url"></div>
+    <div class="qr-url-row">
+      <div id="qr-modal-url" class="qr-modal-url"></div>
+      <button type="button" id="btn-copy-qr-url" class="copy-icon-btn" title="Kopiuj adres Wi-Fi" aria-label="Kopiuj adres Wi-Fi" onclick="copyWifiAddress()">
+        <svg id="icon-copy-sheets" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="9" y="9" width="11" height="11" rx="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        <span id="icon-copy-check" class="hidden">✓</span>
+      </button>
+    </div>
     <div id="qr-canvas-box" class="qr-canvas-box"></div>
     <div id="qr-status-text" class="qr-status-text"></div>
     <button type="button" class="btn-sm" onclick="closeQrModal()">Zamknij okno</button>
@@ -912,14 +1226,21 @@ input:focus, select:focus, textarea:focus {
     <h3 id="pl-select-modal-title" class="qr-modal-title">Playlisty</h3>
     <input type="text" id="pl-search-input" placeholder="Szukaj po nazwie lub dacie / godzinie..." oninput="renderPlaylistPicker()" />
     <div id="pl-picker-list" class="pl-picker-list"></div>
+    <div id="pl-hover-preview" class="pl-hover-preview">
+      <div id="pl-hover-preview-title" class="pl-hover-preview-title">1. kliknięcie: podgląd piosenek • 2. kliknięcie: aktywacja</div>
+      <div id="pl-hover-preview-songs"></div>
+    </div>
     <div class="modal-actions-row">
-      <button type="button" class="btn-sm btn-save" onclick="openPlaylistEditor()">Utwórz / edytuj playlistę</button>
+      <button type="button" id="btn-modal-pl-activate" class="btn-sm btn-save" onclick="activatePreviewedPlaylist()" disabled>Wybierz aktywną</button>
+      <button type="button" id="btn-modal-pl-delete" class="btn-sm btn-danger-inline" onclick="deletePlaylistFromModal()" disabled>Usuń</button>
+      <button type="button" class="btn-sm" onclick="openPlaylistEditor()">Edytor playlist</button>
       <button type="button" class="btn-sm" onclick="closePlaylistSelectModal()">Zamknij</button>
     </div>
   </div>
 </div>
 
 <script>
+const stageWrap = document.getElementById('stage-wrap');
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 let currentState = null;
@@ -929,12 +1250,22 @@ let playlistEditorOpen = false;
 let catalogSongs = [];
 let allPlaylists = [];
 let activePlaylistFilename = '';
+let previewedPlaylistFilename = '';
 let selectedEditorPlaylistFilename = '';
 let draftPlaylistSongs = [];
 let editingFilename = null;
 let resizeObserver = null;
 let themesLoadedOnce = false;
 let serverShutdownDone = false;
+let participantShowChords = false;
+let viewerPresentationMode = false;
+let pendingConfirmResolver = null;
+
+let pdfExportMode = 'song';
+let pdfDirectEditorSong = null;
+let selectedPdfSongFilename = '';
+let selectedPdfPlaylistFilename = '';
+let selectedAddToPlaylistFilename = '';
 
 let autoRemaining = 0;
 let autoSignature = '';
@@ -946,6 +1277,7 @@ let touchStartX = null;
 let touchStartY = null;
 
 const CHORD_PREFIX = '\x01';
+const TEMP_CACHE_KEY = 'songbookwifi_viewer_temp_v1';
 
 const DEFAULT_THEME = {
   name: 'Ciemny klasyczny',
@@ -957,8 +1289,824 @@ const DEFAULT_THEME = {
 
 let activeTheme = { ...DEFAULT_THEME };
 
+function clampFourDigits(inputEl) {
+  if (!inputEl) return;
+  const raw = String(inputEl.value || '').replace(/\D+/g, '').slice(0, 4);
+  inputEl.value = raw;
+}
+
+function loadViewerTempCache() {
+  try {
+    const raw = sessionStorage.getItem(TEMP_CACHE_KEY);
+    if (!raw) return { songs: {}, playlists: {} };
+    const parsed = JSON.parse(raw);
+    return {
+      songs: parsed && typeof parsed.songs === 'object' ? parsed.songs : {},
+      playlists: parsed && typeof parsed.playlists === 'object' ? parsed.playlists : {}
+    };
+  } catch (_) {
+    return { songs: {}, playlists: {} };
+  }
+}
+
+function saveViewerTempCache(cacheObj) {
+  try {
+    sessionStorage.setItem(TEMP_CACHE_KEY, JSON.stringify(cacheObj));
+  } catch (_) {}
+}
+
+function recordParticipantTempBuffer(state) {
+  if (!state || !state.songTitle) return;
+  const songKey = state.filename || state.songTitle;
+  const cache = loadViewerTempCache();
+
+  const existingSong = cache.songs[songKey] || {
+    title: state.songTitle,
+    slides: {}
+  };
+  existingSong.title = state.songTitle;
+
+  const formattedSlide = formatReadableLyricsWithChords(state.slideText || '');
+  const slideKey = String(state.slideIndex ?? 0);
+  if (formattedSlide) {
+    existingSong.slides[slideKey] = formattedSlide;
+  }
+
+  const orderedText = Object.keys(existingSong.slides)
+    .sort((a, b) => Number(a) - Number(b))
+    .map(k => existingSong.slides[k])
+    .filter(Boolean)
+    .join('\n\n');
+
+  existingSong.formattedTxt = `${state.songTitle}\n\n${orderedText}`.trim() + '\n';
+  cache.songs[songKey] = existingSong;
+
+  if (state.playlistName) {
+    const plKey = state.playlistName;
+    const plEntry = cache.playlists[plKey] || {
+      name: state.playlistName,
+      schedule: state.playlistSchedule || '',
+      songs: {}
+    };
+    plEntry.schedule = state.playlistSchedule || plEntry.schedule || '';
+    plEntry.songs[songKey] = existingSong.formattedTxt;
+    cache.playlists[plKey] = plEntry;
+  }
+
+  saveViewerTempCache(cache);
+}
+
+function askAppConfirm(title, message, okLabel = 'Usuń', okClass = 'btn-sm btn-danger-inline') {
+  if (pendingConfirmResolver) {
+    const prev = pendingConfirmResolver;
+    pendingConfirmResolver = null;
+    prev(false);
+  }
+  const backdrop = document.getElementById('confirm-modal-backdrop');
+  const titleEl = document.getElementById('confirm-modal-title');
+  const msgEl = document.getElementById('confirm-modal-msg');
+  const okBtn = document.getElementById('btn-confirm-ok');
+  if (!backdrop || !titleEl || !msgEl || !okBtn) {
+    return Promise.resolve(false);
+  }
+  titleEl.textContent = title || 'Potwierdzenie';
+  msgEl.textContent = message || '';
+  okBtn.textContent = okLabel;
+  okBtn.className = okClass;
+  backdrop.classList.remove('hidden');
+
+  return new Promise(resolve => {
+    pendingConfirmResolver = resolve;
+  });
+}
+
+function resolveAppConfirm(accepted) {
+  const backdrop = document.getElementById('confirm-modal-backdrop');
+  if (backdrop) backdrop.classList.add('hidden');
+  const resolver = pendingConfirmResolver;
+  pendingConfirmResolver = null;
+  if (resolver) resolver(Boolean(accepted));
+}
+
+function onConfirmBackdropClick(event) {
+  if (event.target && event.target.id === 'confirm-modal-backdrop') {
+    resolveAppConfirm(false);
+  }
+}
+
 function isAnySubViewOpen() {
   return songsViewOpen || playlistEditorOpen;
+}
+
+function returnToPresentationView() {
+  songsViewOpen = false;
+  playlistEditorOpen = false;
+  updateUiVisibility();
+  resize();
+}
+
+function handlePresentationIconClick() {
+  if (isAnySubViewOpen()) {
+    returnToPresentationView();
+    return;
+  }
+  openDisplayModal();
+}
+
+function shouldRenderChords() {
+  if (!currentState) return false;
+  if (currentState.canPresent) {
+    return Boolean(activeTheme.showChords);
+  }
+  return Boolean(participantShowChords);
+}
+
+function sanitizeFileBaseName(rawTitle) {
+  const cleaned = (rawTitle || 'piesn')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ł/g, 'l')
+    .replace(/Ł/g, 'L')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return cleaned || 'piesn';
+}
+
+function formatReadableLyricsWithChords(rawLyricsOrSlide) {
+  const src = rawLyricsOrSlide || '';
+  const outLines = [];
+  for (const rawLine of src.split('\n')) {
+    const trimmed = rawLine.trim();
+    if (/^\[[^\]]+\]$/.test(trimmed)) {
+      continue;
+    }
+    if (rawLine.startsWith(CHORD_PREFIX)) {
+      outLines.push(rawLine.slice(CHORD_PREFIX.length).trimEnd());
+    } else if (/^\.[^.\s]/.test(rawLine)) {
+      outLines.push(rawLine.replace(/^\./, '').trimEnd());
+    } else {
+      outLines.push(rawLine.trimEnd());
+    }
+  }
+  return outLines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function buildPlainSongText(state) {
+  if (!state) return '';
+  const songKey = state.filename || state.songTitle || '';
+  const cache = loadViewerTempCache();
+  const cachedSong = songKey && cache.songs[songKey];
+
+  if (cachedSong && cachedSong.formattedTxt) {
+    return cachedSong.formattedTxt;
+  }
+
+  const headerLines = [];
+  if (state.songTitle) headerLines.push(state.songTitle);
+  const metaParts = [];
+  if (state.song && state.song.key) metaParts.push(`Tonacja: ${state.song.key}`);
+  if (state.song && state.song.tempo) metaParts.push(`Tempo: ${state.song.tempo}`);
+  if (state.song && state.song.time_sig) metaParts.push(`Metrum: ${state.song.time_sig}`);
+  if (metaParts.length > 0) headerLines.push(metaParts.join(' | '));
+
+  const rawBody = (state.song && state.song.lyrics) ? state.song.lyrics : (state.slideText || '');
+  const formattedBody = formatReadableLyricsWithChords(rawBody);
+  return [...headerLines, '', formattedBody].join('\n').trim() + '\n';
+}
+
+function downloadCurrentSongAsTxt() {
+  if (!currentState) return;
+  recordParticipantTempBuffer(currentState);
+  const textContent = buildPlainSongText(currentState);
+  const baseName = sanitizeFileBaseName(currentState.songTitle || currentState.filename || 'piesn');
+  const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${baseName}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function toAsciiPdfText(str) {
+  return (str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ł/g, 'l')
+    .replace(/Ł/g, 'L')
+    .replace(/[^\x20-\x7E]/g, ' ');
+}
+
+function escapePdfString(str) {
+  return toAsciiPdfText(str)
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function wrapPlainTextForPdf(text, maxChars) {
+  const out = [];
+  for (const rawLine of (text || '').split('\n')) {
+    if (!rawLine.trim()) {
+      out.push('');
+      continue;
+    }
+    const words = rawLine.trim().split(/\s+/);
+    let line = '';
+    for (const w of words) {
+      const candidate = line ? `${line} ${w}` : w;
+      if (line && candidate.length > maxChars) {
+        out.push(line);
+        line = w;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) out.push(line);
+  }
+  return out;
+}
+
+function buildSongPdfSections(songObj) {
+  const title = (songObj && songObj.title) || currentState?.songTitle || 'Piesn';
+  const metaParts = [];
+  if (songObj && songObj.hymn_number) metaParts.push(`Nr: ${songObj.hymn_number}`);
+  if (songObj && songObj.key) metaParts.push(`Tonacja: ${songObj.key}`);
+  if (songObj && songObj.tempo) metaParts.push(`Tempo: ${songObj.tempo}`);
+  if (songObj && songObj.time_sig) metaParts.push(`Metrum: ${songObj.time_sig}`);
+  if (songObj && songObj.author) metaParts.push(`Autor: ${songObj.author}`);
+
+  const rawBody = (songObj && typeof songObj.lyrics === 'string')
+    ? songObj.lyrics
+    : (currentState?.slideText || '');
+  const formattedBody = formatReadableLyricsWithChords(rawBody);
+  return {
+    title,
+    subtitle: metaParts.join('  |  '),
+    body: formattedBody
+  };
+}
+
+function getPdfFontMetrics(sizeChoice, twoColumns) {
+  if (sizeChoice === 'small') {
+    return {
+      bodyFontSize: twoColumns ? 9.5 : 10.5,
+      lineStep: twoColumns ? 12.5 : 14,
+      titleFontSize: twoColumns ? 12.5 : 14,
+      maxChars: twoColumns ? 42 : 90
+    };
+  }
+  if (sizeChoice === 'large') {
+    return {
+      bodyFontSize: twoColumns ? 12 : 14,
+      lineStep: twoColumns ? 15.5 : 18.5,
+      titleFontSize: twoColumns ? 15 : 17,
+      maxChars: twoColumns ? 33 : 68
+    };
+  }
+  return {
+    bodyFontSize: twoColumns ? 10.5 : 12,
+    lineStep: twoColumns ? 14 : 16,
+    titleFontSize: twoColumns ? 14 : 15.5,
+    maxChars: twoColumns ? 38 : 80
+  };
+}
+
+function buildSongItemsList(sec, metrics, isFirstSong, eachSongNewPage) {
+  const items = [];
+  if (!isFirstSong && !eachSongNewPage) {
+    items.push({ kind: 'spacer', h: 12 });
+    items.push({ kind: 'divider', h: 16 });
+  }
+  items.push({
+    kind: 'title',
+    text: sec.title || 'Piesn',
+    fontSize: metrics.titleFontSize,
+    h: metrics.titleFontSize + 9
+  });
+  if (sec.subtitle) {
+    items.push({
+      kind: 'subtitle',
+      text: sec.subtitle,
+      fontSize: Math.max(8.5, metrics.bodyFontSize - 1.5),
+      h: metrics.lineStep + 2
+    });
+  }
+  const wrapped = wrapPlainTextForPdf(sec.body || '', metrics.maxChars);
+  wrapped.forEach(line => {
+    items.push({
+      kind: 'body',
+      text: line,
+      fontSize: metrics.bodyFontSize,
+      h: metrics.lineStep
+    });
+  });
+  return items;
+}
+
+function generatePdfBytesFromSections(sections, options = {}) {
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const marginX = 46;
+  const topY = 794;
+  const bottomY = 48;
+  const twoColumns = Boolean(options.twoColumns);
+  const eachSongNewPage = Boolean(options.eachSongNewPage);
+  const metrics = getPdfFontMetrics(options.fontSize || 'medium', twoColumns);
+
+  const colGap = 24;
+  const colWidth = twoColumns ? (pageWidth - marginX * 2 - colGap) / 2 : (pageWidth - marginX * 2);
+  const colStarts = twoColumns ? [marginX, marginX + colWidth + colGap] : [marginX];
+
+  const pagesOps = [];
+  let currentPageOps = [];
+  let colIdx = 0;
+  let y = topY;
+
+  function startNewPage() {
+    if (currentPageOps.length > 0 || pagesOps.length === 0) {
+      pagesOps.push(currentPageOps.join('\n'));
+    }
+    currentPageOps = [];
+    colIdx = 0;
+    y = topY;
+  }
+
+  function advanceColumnOrPage() {
+    if (twoColumns && colIdx === 0) {
+      colIdx = 1;
+      y = topY;
+      return true;
+    }
+    startNewPage();
+    return true;
+  }
+
+  function renderItem(item) {
+    const x = colStarts[colIdx];
+    if (item.kind === 'title') {
+      currentPageOps.push(`BT /F2 ${item.fontSize} Tf ${x} ${y.toFixed(1)} Td (${escapePdfString(item.text)}) Tj ET`);
+      y -= item.h;
+    } else if (item.kind === 'subtitle') {
+      currentPageOps.push(`BT /F1 ${item.fontSize} Tf ${x} ${y.toFixed(1)} Td (${escapePdfString(item.text)}) Tj ET`);
+      y -= item.h;
+    } else if (item.kind === 'divider') {
+      const lineY = y + item.h * 0.45;
+      currentPageOps.push(`${x.toFixed(1)} ${lineY.toFixed(1)} m ${(x + colWidth).toFixed(1)} ${lineY.toFixed(1)} l S`);
+      y -= item.h;
+    } else if (item.kind === 'spacer') {
+      y -= item.h;
+    } else {
+      currentPageOps.push(`BT /F1 ${item.fontSize} Tf ${x} ${y.toFixed(1)} Td (${escapePdfString(item.text)}) Tj ET`);
+      y -= item.h;
+    }
+  }
+
+  (sections || []).forEach((sec, secIdx) => {
+    if (secIdx > 0 && eachSongNewPage) {
+      startNewPage();
+    }
+    const items = buildSongItemsList(sec, metrics, secIdx === 0, eachSongNewPage);
+    for (const item of items) {
+      if (y - item.h < bottomY) {
+        if (currentPageOps.length > 0 || colIdx > 0) {
+          advanceColumnOrPage();
+        }
+      }
+      renderItem(item);
+    }
+  });
+
+  if (currentPageOps.length > 0 || pagesOps.length === 0) {
+    pagesOps.push(currentPageOps.join('\n'));
+  }
+
+  const objects = [];
+  const catalogId = 1;
+  const pagesId = 2;
+  const fontRegId = 3;
+  const fontBoldId = 4;
+  let nextId = 5;
+
+  const pageEntries = pagesOps.map(streamStr => {
+    const pageId = nextId++;
+    const contentId = nextId++;
+    const streamBytes = new TextEncoder().encode(streamStr);
+    return { pageId, contentId, streamStr, byteLen: streamBytes.length };
+  });
+
+  objects[catalogId] = `${catalogId} 0 obj\n<< /Type /Catalog /Pages ${pagesId} 0 R >>\nendobj\n`;
+  const kidsRefs = pageEntries.map(p => `${p.pageId} 0 R`).join(' ');
+  objects[pagesId] = `${pagesId} 0 obj\n<< /Type /Pages /Kids [ ${kidsRefs} ] /Count ${pageEntries.length} >>\nendobj\n`;
+  objects[fontRegId] = `${fontRegId} 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`;
+  objects[fontBoldId] = `${fontBoldId} 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n`;
+
+  for (const p of pageEntries) {
+    objects[p.pageId] = `${p.pageId} 0 obj\n<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontRegId} 0 R /F2 ${fontBoldId} 0 R >> >> /Contents ${p.contentId} 0 R >>\nendobj\n`;
+    objects[p.contentId] = `${p.contentId} 0 obj\n<< /Length ${p.byteLen} >>\nstream\n${p.streamStr}\nendstream\nendobj\n`;
+  }
+
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  for (let i = 1; i < objects.length; i++) {
+    offsets[i] = new TextEncoder().encode(pdf).length;
+    pdf += objects[i];
+  }
+
+  const xrefOffset = new TextEncoder().encode(pdf).length;
+  pdf += `xref\n0 ${objects.length}\n`;
+  pdf += '0000000000 65535 f \n';
+  for (let i = 1; i < objects.length; i++) {
+    pdf += `${String(offsets[i]).padStart(10, '0')} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  return new TextEncoder().encode(pdf);
+}
+
+function triggerPdfDownload(pdfBytes, baseName) {
+  const safeBase = sanitizeFileBaseName(baseName || 'spiewnik');
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${safeBase}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function findFullSongObject(filename, fallbackTitle) {
+  if (filename) {
+    const byFile = catalogSongs.find(s => s.filename === filename);
+    if (byFile) return byFile;
+  }
+  if (currentState && currentState.song && (!fallbackTitle || currentState.song.title === fallbackTitle)) {
+    return currentState.song;
+  }
+  if (fallbackTitle) {
+    const byTitle = catalogSongs.find(s => s.title === fallbackTitle);
+    if (byTitle) return byTitle;
+  }
+  return null;
+}
+
+function getSelectedPdfPrintOptions() {
+  return {
+    fontSize: document.getElementById('pdf-font-size')?.value || 'medium',
+    twoColumns: Boolean(document.getElementById('pdf-two-columns')?.checked),
+    eachSongNewPage: Boolean(document.getElementById('pdf-each-song-new-page')?.checked)
+  };
+}
+
+function openEditorSongPdfModal() {
+  const titleVal = (document.getElementById('f-title')?.value || '').trim();
+  const lyricsVal = document.getElementById('f-lyrics')?.value || '';
+  pdfDirectEditorSong = {
+    title: titleVal || 'Piesn',
+    hymn_number: (document.getElementById('f-hymn-number')?.value || '').trim(),
+    key: (document.getElementById('f-key')?.value || '').trim(),
+    tempo: (document.getElementById('f-tempo')?.value || '').trim(),
+    time_sig: (document.getElementById('f-time-sig')?.value || '').trim(),
+    author: (document.getElementById('f-author')?.value || '').trim(),
+    lyrics: lyricsVal
+  };
+  document.getElementById('pdf-modal-title').textContent = 'Parametry PDF — ta piosenka';
+  document.getElementById('pdf-tabs-container').classList.add('hidden');
+  document.getElementById('pdf-song-panel').classList.add('hidden');
+  document.getElementById('pdf-playlist-panel').classList.add('hidden');
+  document.getElementById('pdf-each-song-page-row').classList.add('hidden');
+  document.getElementById('pdf-modal-status').textContent = `Utwór: ${pdfDirectEditorSong.title}`;
+  document.getElementById('pdf-modal-backdrop').classList.remove('hidden');
+}
+
+async function openPdfExportModal() {
+  if (!currentState || !currentState.canPresent) return;
+  pdfDirectEditorSong = null;
+  closeQrModal();
+  closeDisplayModal();
+  closePlaylistSelectModal();
+  closeAddToPlaylistModal();
+
+  if (catalogSongs.length === 0) {
+    await loadSongsCatalog();
+  }
+  if (allPlaylists.length === 0) {
+    await fetchPlaylistsData();
+  }
+
+  const currentSongObj = findFullSongObject(currentState.filename, currentState.songTitle);
+  selectedPdfSongFilename = currentSongObj?.filename || (catalogSongs[0]?.filename || '');
+  selectedPdfPlaylistFilename = activePlaylistFilename || (allPlaylists[0]?.filename || '');
+
+  document.getElementById('pdf-modal-title').textContent = 'Parametry drukowania PDF';
+  document.getElementById('pdf-tabs-container').classList.remove('hidden');
+  const searchInp = document.getElementById('pdf-song-search');
+  if (searchInp) searchInp.value = '';
+  document.getElementById('pdf-modal-status').textContent = '';
+
+  switchPdfExportMode('song');
+  document.getElementById('pdf-modal-backdrop').classList.remove('hidden');
+}
+
+function closePdfExportModal() {
+  pdfDirectEditorSong = null;
+  document.getElementById('pdf-modal-backdrop').classList.add('hidden');
+}
+
+function onPdfModalBackdropClick(event) {
+  if (event.target && event.target.id === 'pdf-modal-backdrop') {
+    closePdfExportModal();
+  }
+}
+
+function switchPdfExportMode(mode) {
+  pdfExportMode = mode === 'playlist' ? 'playlist' : 'song';
+  const tabSong = document.getElementById('pdf-tab-song');
+  const tabPl = document.getElementById('pdf-tab-playlist');
+  const panelSong = document.getElementById('pdf-song-panel');
+  const panelPl = document.getElementById('pdf-playlist-panel');
+  const eachPageRow = document.getElementById('pdf-each-song-page-row');
+
+  tabSong.classList.toggle('active', pdfExportMode === 'song');
+  tabPl.classList.toggle('active', pdfExportMode === 'playlist');
+  panelSong.classList.toggle('hidden', pdfExportMode !== 'song');
+  panelPl.classList.toggle('hidden', pdfExportMode !== 'playlist');
+  eachPageRow.classList.toggle('hidden', pdfExportMode !== 'playlist');
+
+  if (pdfExportMode === 'song') {
+    renderPdfSongPicker();
+  } else {
+    renderPdfPlaylistPicker();
+  }
+}
+
+function renderPdfSongPicker() {
+  const listEl = document.getElementById('pdf-song-list');
+  const query = (document.getElementById('pdf-song-search')?.value || '').toLowerCase().trim();
+  const words = query ? query.split(/\s+/) : [];
+  listEl.replaceChildren();
+
+  const filtered = catalogSongs.filter(s => {
+    if (words.length === 0) return true;
+    const titleHay = (s.title || '').toLowerCase();
+    return words.every(w => titleHay.includes(w));
+  });
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'pl-picker-meta';
+    empty.textContent = 'Brak piosenek pasujących do słów w tytule.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(s => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pl-picker-item' + (s.filename === selectedPdfSongFilename ? ' selected' : '');
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'pl-picker-name';
+    titleEl.textContent = s.hymn_number ? `${s.hymn_number}. ${s.title}` : (s.title || s.filename);
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'pl-picker-meta';
+    metaEl.textContent = [s.author, s.key].filter(Boolean).join(' • ') || s.filename;
+
+    btn.appendChild(titleEl);
+    btn.appendChild(metaEl);
+    btn.onclick = () => {
+      selectedPdfSongFilename = s.filename;
+      renderPdfSongPicker();
+    };
+    listEl.appendChild(btn);
+  });
+}
+
+function renderPdfPlaylistPicker() {
+  const listEl = document.getElementById('pdf-playlist-list');
+  listEl.replaceChildren();
+
+  if (allPlaylists.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'pl-picker-meta';
+    empty.textContent = 'Brak zapisanych playlist.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  allPlaylists.forEach(pl => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pl-picker-item' + (pl.filename === selectedPdfPlaylistFilename ? ' selected' : '');
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'pl-picker-name';
+    titleEl.textContent = pl.name || pl.filename;
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'pl-picker-meta';
+    const count = Array.isArray(pl.songs) ? pl.songs.length : 0;
+    metaEl.textContent = [pl.schedule, `${count} utworów`].filter(Boolean).join(' • ');
+
+    btn.appendChild(titleEl);
+    btn.appendChild(metaEl);
+    btn.onclick = () => {
+      selectedPdfPlaylistFilename = pl.filename;
+      renderPdfPlaylistPicker();
+    };
+    listEl.appendChild(btn);
+  });
+}
+
+function confirmPdfExport() {
+  const statusEl = document.getElementById('pdf-modal-status');
+  const opts = getSelectedPdfPrintOptions();
+
+  if (pdfDirectEditorSong) {
+    const sec = buildSongPdfSections(pdfDirectEditorSong);
+    triggerPdfDownload(generatePdfBytesFromSections([sec], opts), sec.title);
+    closePdfExportModal();
+    return;
+  }
+
+  if (pdfExportMode === 'song') {
+    const songObj = findFullSongObject(selectedPdfSongFilename, '');
+    if (!songObj && currentState) {
+      const sec = buildSongPdfSections({
+        title: currentState.songTitle || 'Piesn',
+        lyrics: currentState.slideText || ''
+      });
+      triggerPdfDownload(generatePdfBytesFromSections([sec], opts), sec.title);
+      closePdfExportModal();
+      return;
+    }
+    if (!songObj) {
+      statusEl.textContent = 'Wybierz piosenkę do pobrania.';
+      return;
+    }
+    const sec = buildSongPdfSections(songObj);
+    triggerPdfDownload(generatePdfBytesFromSections([sec], opts), sec.title);
+    closePdfExportModal();
+    return;
+  }
+
+  const pl = allPlaylists.find(p => p.filename === selectedPdfPlaylistFilename);
+  if (!pl) {
+    statusEl.textContent = 'Wybierz playlistę do wydruku.';
+    return;
+  }
+  const songFiles = Array.isArray(pl.songs) ? pl.songs : [];
+  const sections = songFiles.map((fname, idx) => {
+    const found = catalogSongs.find(s => s.filename === fname);
+    if (found) {
+      return buildSongPdfSections({
+        ...found,
+        title: `${idx + 1}. ${found.title || fname}`
+      });
+    }
+    return {
+      title: `${idx + 1}. ${formatFallbackSongLabel(fname)}`,
+      subtitle: '',
+      body: ''
+    };
+  });
+
+  if (sections.length === 0) {
+    statusEl.textContent = 'Wybrana playlista nie zawiera utworów.';
+    return;
+  }
+
+  const pdfBytes = generatePdfBytesFromSections(sections, opts);
+  triggerPdfDownload(pdfBytes, pl.name || pl.filename || 'playlista');
+  closePdfExportModal();
+}
+
+async function openAddCurrentSongToPlaylistModal() {
+  if (!currentState || !currentState.canPresent) return;
+  const titleVal = (document.getElementById('f-title')?.value || '').trim();
+  const songIdentifier = editingFilename || titleVal;
+  if (!songIdentifier) {
+    setEditorStatus('Najpierw wpisz tytuł lub wybierz piosenkę, aby dodać ją do playlisty.', true);
+    return;
+  }
+
+  if (allPlaylists.length === 0) {
+    await fetchPlaylistsData();
+  }
+
+  selectedAddToPlaylistFilename = activePlaylistFilename || (allPlaylists[0]?.filename || '');
+  document.getElementById('add-to-pl-song-label').textContent = `Utwór: ${titleVal || editingFilename}`;
+  document.getElementById('add-to-pl-status').textContent = '';
+  renderAddToPlaylistPicker();
+  document.getElementById('add-to-pl-modal-backdrop').classList.remove('hidden');
+}
+
+function closeAddToPlaylistModal() {
+  document.getElementById('add-to-pl-modal-backdrop').classList.add('hidden');
+}
+
+function onAddToPlaylistBackdropClick(event) {
+  if (event.target && event.target.id === 'add-to-pl-modal-backdrop') {
+    closeAddToPlaylistModal();
+  }
+}
+
+function renderAddToPlaylistPicker() {
+  const listEl = document.getElementById('add-to-pl-list');
+  listEl.replaceChildren();
+
+  if (allPlaylists.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'pl-picker-meta';
+    empty.textContent = 'Brak playlist. Utwórz najpierw playlistę w widoku Playlisty.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  allPlaylists.forEach(pl => {
+    const isActivePl = pl.filename === activePlaylistFilename;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pl-picker-item' + (pl.filename === selectedAddToPlaylistFilename ? ' selected' : '');
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'pl-picker-name';
+    titleEl.textContent = isActivePl ? `${pl.name || pl.filename} (aktywna)` : (pl.name || pl.filename);
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'pl-picker-meta';
+    const count = Array.isArray(pl.songs) ? pl.songs.length : 0;
+    metaEl.textContent = [pl.schedule, `${count} utworów`].filter(Boolean).join(' • ');
+
+    btn.appendChild(titleEl);
+    btn.appendChild(metaEl);
+    btn.onclick = () => {
+      selectedAddToPlaylistFilename = pl.filename;
+      renderAddToPlaylistPicker();
+    };
+    listEl.appendChild(btn);
+  });
+}
+
+async function confirmAddSongToSelectedPlaylist() {
+  const statusEl = document.getElementById('add-to-pl-status');
+  const pl = allPlaylists.find(p => p.filename === selectedAddToPlaylistFilename);
+  if (!pl) {
+    statusEl.textContent = 'Wybierz playlistę.';
+    return;
+  }
+
+  const titleVal = (document.getElementById('f-title')?.value || '').trim();
+  let songEntry = editingFilename || '';
+  if (!songEntry && titleVal) {
+    const foundByTitle = catalogSongs.find(s => (s.title || '').trim().toLowerCase() === titleVal.toLowerCase());
+    if (foundByTitle) songEntry = foundByTitle.filename;
+  }
+  if (!songEntry) {
+    statusEl.textContent = 'Najpierw zapisz piosenkę, aby dodać jej plik do playlisty.';
+    return;
+  }
+
+  const nextSongs = Array.isArray(pl.songs) ? [...pl.songs, songEntry] : [songEntry];
+  const payload = {
+    name: pl.name || '',
+    date: pl.date || '',
+    time: pl.time || '',
+    songs: nextSongs
+  };
+
+  try {
+    const res = await fetch('/api/playlists/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      statusEl.textContent = (data && data.error) || 'Nie udało się dodać do playlisty.';
+      return;
+    }
+    if (data.playlists) {
+      allPlaylists = data.playlists.playlists || allPlaylists;
+      activePlaylistFilename = data.playlists.activeFilename || activePlaylistFilename;
+    }
+    if (data.state) {
+      currentState = data.state;
+      renderToolbar(currentState, true);
+    }
+    if (selectedEditorPlaylistFilename === pl.filename) {
+      draftPlaylistSongs = [...nextSongs];
+      renderPlaylistSongLists();
+    }
+    setEditorStatus(`Dodano "${titleVal || songEntry}" do playlisty "${pl.name || pl.filename}".`, false);
+    closeAddToPlaylistModal();
+  } catch (_) {
+    statusEl.textContent = 'Błąd połączenia z serwerem.';
+  }
 }
 
 function openDatePicker() {
@@ -1007,6 +2155,8 @@ function openDisplayModal() {
   if (!currentState || !currentState.canPresent) return;
   closeQrModal();
   closePlaylistSelectModal();
+  closePdfExportModal();
+  closeAddToPlaylistModal();
   applyThemeFromState(currentState.theme);
   loadThemesList();
   document.getElementById('display-modal-backdrop').classList.remove('hidden');
@@ -1026,12 +2176,17 @@ async function openPlaylistSelectModal() {
   if (!currentState || !currentState.canPresent) return;
   closeQrModal();
   closeDisplayModal();
+  closePdfExportModal();
+  closeAddToPlaylistModal();
   await fetchPlaylistsData();
+  previewedPlaylistFilename = activePlaylistFilename || (allPlaylists[0]?.filename || '');
   const inp = document.getElementById('pl-search-input');
   if (inp) inp.value = '';
   renderPlaylistPicker();
   document.getElementById('pl-select-modal-backdrop').classList.remove('hidden');
-  if (inp) inp.focus();
+  if (catalogSongs.length === 0) {
+    loadSongsCatalog();
+  }
 }
 
 function closePlaylistSelectModal() {
@@ -1054,6 +2209,78 @@ async function fetchPlaylistsData() {
   } catch (_) {}
 }
 
+function formatFallbackSongLabel(fname) {
+  return String(fname || '')
+    .replace(/\.(json|txt|chordpro|cho)$/i, '')
+    .replace(/[_-]+/g, ' ')
+    .trim();
+}
+
+function resolvePlaylistSongItems(pl) {
+  if (!pl) return [];
+  const rawFiles = Array.isArray(pl.songs) ? pl.songs : [];
+  const rawTitles = Array.isArray(pl.songTitles) ? pl.songTitles : (Array.isArray(pl.titles) ? pl.titles : []);
+  return rawFiles.map((fname, idx) => {
+    const found = catalogSongs.find(s => s.filename === fname);
+    if (found) {
+      return found.hymn_number ? `${found.hymn_number}. ${found.title}` : (found.title || formatFallbackSongLabel(fname));
+    }
+    if (rawTitles[idx]) {
+      return String(rawTitles[idx]);
+    }
+    return formatFallbackSongLabel(fname);
+  });
+}
+
+function renderPlaylistHoverPreview(targetFilename) {
+  const titleEl = document.getElementById('pl-hover-preview-title');
+  const songsEl = document.getElementById('pl-hover-preview-songs');
+  const delBtn = document.getElementById('btn-modal-pl-delete');
+  const actBtn = document.getElementById('btn-modal-pl-activate');
+  if (!titleEl || !songsEl) return;
+
+  const pl = allPlaylists.find(p => p.filename === targetFilename)
+    || allPlaylists.find(p => p.filename === activePlaylistFilename)
+    || null;
+
+  if (delBtn) delBtn.disabled = !pl;
+  if (actBtn) actBtn.disabled = !pl;
+
+  songsEl.replaceChildren();
+  if (!pl) {
+    titleEl.textContent = '1. kliknięcie: podgląd piosenek • 2. kliknięcie: aktywacja';
+    return;
+  }
+
+  const isActive = pl.filename === activePlaylistFilename;
+  titleEl.textContent = isActive
+    ? `Aktywna: ${pl.name || pl.filename}`
+    : `Podgląd (kliknij ponownie, aby aktywować): ${pl.name || pl.filename}`;
+
+  const items = resolvePlaylistSongItems(pl);
+  if (items.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'pl-picker-meta';
+    empty.textContent = 'Ta playlista jest pusta.';
+    songsEl.appendChild(empty);
+    return;
+  }
+
+  items.forEach((label, idx) => {
+    const line = document.createElement('div');
+    line.className = 'pl-hover-song-line';
+    line.textContent = `${idx + 1}. ${label}`;
+    songsEl.appendChild(line);
+  });
+}
+
+function activatePreviewedPlaylist() {
+  const target = previewedPlaylistFilename || activePlaylistFilename;
+  if (target) {
+    selectPlaylistByFilename(target);
+  }
+}
+
 function renderPlaylistPicker() {
   const listEl = document.getElementById('pl-picker-list');
   const query = (document.getElementById('pl-search-input').value || '').toLowerCase().trim();
@@ -1071,17 +2298,26 @@ function renderPlaylistPicker() {
     empty.className = 'pl-picker-meta';
     empty.textContent = 'Brak pasujących playlist.';
     listEl.appendChild(empty);
+    renderPlaylistHoverPreview('');
     return;
+  }
+
+  if (!previewedPlaylistFilename || !filtered.some(p => p.filename === previewedPlaylistFilename)) {
+    previewedPlaylistFilename = filtered.some(p => p.filename === activePlaylistFilename)
+      ? activePlaylistFilename
+      : filtered[0].filename;
   }
 
   filtered.forEach(pl => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'pl-picker-item' + (pl.filename === activePlaylistFilename ? ' selected' : '');
+    const isActive = pl.filename === activePlaylistFilename;
+    const isPreviewed = pl.filename === previewedPlaylistFilename;
+    btn.className = 'pl-picker-item' + (isActive ? ' selected' : '') + (isPreviewed ? ' previewed' : '');
 
     const title = document.createElement('div');
     title.className = 'pl-picker-name';
-    title.textContent = pl.name || pl.filename;
+    title.textContent = isActive ? `${pl.name || pl.filename} [aktywna]` : (pl.name || pl.filename);
 
     const meta = document.createElement('div');
     meta.className = 'pl-picker-meta';
@@ -1090,9 +2326,54 @@ function renderPlaylistPicker() {
 
     btn.appendChild(title);
     btn.appendChild(meta);
-    btn.onclick = () => selectPlaylistByFilename(pl.filename);
+    btn.onclick = () => {
+      if (previewedPlaylistFilename === pl.filename) {
+        selectPlaylistByFilename(pl.filename);
+      } else {
+        previewedPlaylistFilename = pl.filename;
+        renderPlaylistPicker();
+      }
+    };
+
     listEl.appendChild(btn);
   });
+
+  renderPlaylistHoverPreview(previewedPlaylistFilename);
+}
+
+async function deletePlaylistFromModal() {
+  const targetFilename = previewedPlaylistFilename || activePlaylistFilename;
+  if (!targetFilename) return;
+  const target = allPlaylists.find(p => p.filename === targetFilename);
+  const label = (target && target.name) || targetFilename;
+  const ok = await askAppConfirm('Usuń playlistę', `Usunąć playlistę "${label}"?`, 'Usuń');
+  if (!ok) return;
+
+  try {
+    const res = await fetch('/api/playlists/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ filename: targetFilename })
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      await askAppConfirm('Błąd', (data && data.error) || 'Nie udało się usunąć playlisty.', 'OK', 'btn-sm');
+      return;
+    }
+    allPlaylists = data.playlists ? (data.playlists.playlists || []) : [];
+    activePlaylistFilename = data.playlists ? (data.playlists.activeFilename || '') : '';
+    if (selectedEditorPlaylistFilename === targetFilename) {
+      selectedEditorPlaylistFilename = allPlaylists[0]?.filename || '';
+    }
+    if (data.state) {
+      currentState = data.state;
+      renderToolbar(currentState, true);
+    }
+    previewedPlaylistFilename = activePlaylistFilename || (allPlaylists[0]?.filename || '');
+    renderPlaylistPicker();
+  } catch (_) {
+    await askAppConfirm('Błąd', 'Błąd połączenia z serwerem.', 'OK', 'btn-sm');
+  }
 }
 
 async function selectPlaylistByFilename(filename) {
@@ -1123,6 +2404,8 @@ async function openPlaylistEditor() {
   closePlaylistSelectModal();
   closeDisplayModal();
   closeQrModal();
+  closePdfExportModal();
+  closeAddToPlaylistModal();
   updateUiVisibility();
   await Promise.all([loadSongsCatalog(), fetchPlaylistsData()]);
   if (!selectedEditorPlaylistFilename && allPlaylists.length > 0) {
@@ -1138,12 +2421,6 @@ async function openPlaylistEditor() {
     renderPlaylistSongLists();
   }
   window.scrollTo({ top: 0, behavior: 'auto' });
-}
-
-function closePlaylistEditor() {
-  playlistEditorOpen = false;
-  updateUiVisibility();
-  resize();
 }
 
 function updateDeletePlaylistButton() {
@@ -1228,7 +2505,8 @@ async function deleteSelectedPlaylist() {
   if (!selectedEditorPlaylistFilename) return;
   const target = allPlaylists.find(p => p.filename === selectedEditorPlaylistFilename);
   const label = (target && target.name) || selectedEditorPlaylistFilename;
-  if (!confirm(`Czy na pewno skasować playlistę "${label}"?`)) return;
+  const ok = await askAppConfirm('Skasuj playlistę', `Skasować playlistę "${label}"?`, 'Usuń');
+  if (!ok) return;
 
   try {
     const res = await fetch('/api/playlists/delete', {
@@ -1378,10 +2656,32 @@ function setPlaylistStatus(message, isError) {
   el.className = 'status-msg ' + (message ? (isError ? 'status-err' : 'status-ok') : '');
 }
 
+function resetCopyButtonState() {
+  const btn = document.getElementById('btn-copy-qr-url');
+  const sheetsIcon = document.getElementById('icon-copy-sheets');
+  const checkIcon = document.getElementById('icon-copy-check');
+  if (btn) btn.classList.remove('copied');
+  if (sheetsIcon) sheetsIcon.classList.remove('hidden');
+  if (checkIcon) checkIcon.classList.add('hidden');
+}
+
+function showCopiedButtonState() {
+  const btn = document.getElementById('btn-copy-qr-url');
+  const sheetsIcon = document.getElementById('icon-copy-sheets');
+  const checkIcon = document.getElementById('icon-copy-check');
+  if (btn) btn.classList.add('copied');
+  if (sheetsIcon) sheetsIcon.classList.add('hidden');
+  if (checkIcon) checkIcon.classList.remove('hidden');
+  setTimeout(resetCopyButtonState, 1600);
+}
+
 function openQrModal() {
   if (!currentState || !currentState.canPresent) return;
   closeDisplayModal();
   closePlaylistSelectModal();
+  closePdfExportModal();
+  closeAddToPlaylistModal();
+  resetCopyButtonState();
   const backdrop = document.getElementById('qr-modal-backdrop');
   const urlEl = document.getElementById('qr-modal-url');
   const boxEl = document.getElementById('qr-canvas-box');
@@ -1429,12 +2729,61 @@ function closeQrModal() {
   if (backdrop) backdrop.classList.add('hidden');
   if (boxEl) boxEl.innerHTML = '';
   if (statusEl) statusEl.textContent = '';
+  resetCopyButtonState();
 }
 
 function onQrBackdropClick(event) {
   if (event.target && event.target.id === 'qr-modal-backdrop') {
     closeQrModal();
   }
+}
+
+function updateViewerControls() {
+  const menuBar = document.getElementById('viewer-menu-bar');
+  const floatBtn = document.getElementById('btn-viewer-present-float');
+  const viewerBtn = document.getElementById('btn-viewer-chords');
+  const dlBtn = document.getElementById('btn-viewer-download');
+
+  const isViewerOnStage = Boolean(currentState && !currentState.canPresent && !isAnySubViewOpen());
+  if (menuBar) {
+    menuBar.classList.toggle('hidden', !isViewerOnStage || viewerPresentationMode);
+  }
+  if (floatBtn) {
+    floatBtn.classList.toggle('hidden', !isViewerOnStage || !viewerPresentationMode);
+  }
+  if (viewerBtn) {
+    const viewerVisible = Boolean(participantShowChords);
+    viewerBtn.classList.toggle('chords-on', viewerVisible);
+    viewerBtn.classList.toggle('chords-hidden', !viewerVisible);
+    viewerBtn.title = viewerVisible
+      ? 'Akordy włączone u Ciebie — kliknij, aby ukryć'
+      : 'Akordy ukryte — kliknij, aby włączyć u siebie';
+  }
+  if (dlBtn) {
+    dlBtn.disabled = !currentState || !currentState.songTitle;
+  }
+}
+
+function toggleViewerPresentationMode() {
+  viewerPresentationMode = !viewerPresentationMode;
+  updateViewerControls();
+  resize();
+}
+
+function updateChordsToggleButton() {
+  const btn = document.getElementById('btn-chords-toggle');
+  if (btn) {
+    const visible = Boolean(activeTheme.showChords);
+    btn.classList.toggle('chords-hidden', !visible);
+    btn.title = visible ? 'Akordy widoczne — kliknij, aby ukryć' : 'Akordy ukryte — kliknij, aby pokazać';
+  }
+  updateViewerControls();
+}
+
+function toggleViewerChords() {
+  participantShowChords = !participantShowChords;
+  updateChordsToggleButton();
+  draw();
 }
 
 function applyThemeFromState(themeObj) {
@@ -1449,11 +2798,10 @@ function applyThemeFromState(themeObj) {
   const bgEl = document.getElementById('col-bg');
   const textEl = document.getElementById('col-text');
   const chordEl = document.getElementById('col-chord');
-  const chordsChk = document.getElementById('chk-show-chords');
   if (bgEl && document.activeElement !== bgEl) bgEl.value = activeTheme.bg;
   if (textEl && document.activeElement !== textEl) textEl.value = activeTheme.text;
   if (chordEl && document.activeElement !== chordEl) chordEl.value = activeTheme.chord;
-  if (chordsChk && document.activeElement !== chordsChk) chordsChk.checked = activeTheme.showChords;
+  updateChordsToggleButton();
 }
 
 async function loadThemesList() {
@@ -1482,20 +2830,8 @@ async function loadThemesList() {
   } catch (_) {}
 }
 
-async function onThemeChange() {
+async function sendThemeUpdate(payload) {
   if (!currentState || !currentState.canPresent) return;
-  const bgEl = document.getElementById('col-bg');
-  const textEl = document.getElementById('col-text');
-  const chordEl = document.getElementById('col-chord');
-  const chordsChk = document.getElementById('chk-show-chords');
-
-  const payload = {
-    bg: bgEl ? bgEl.value : activeTheme.bg,
-    text: textEl ? textEl.value : activeTheme.text,
-    chord: chordEl ? chordEl.value : activeTheme.chord,
-    showChords: chordsChk ? Boolean(chordsChk.checked) : true
-  };
-
   try {
     const res = await fetch('/api/theme', {
       method: 'POST',
@@ -1508,6 +2844,30 @@ async function onThemeChange() {
       draw();
     }
   } catch (_) {}
+}
+
+async function onThemeChange() {
+  if (!currentState || !currentState.canPresent) return;
+  const bgEl = document.getElementById('col-bg');
+  const textEl = document.getElementById('col-text');
+  const chordEl = document.getElementById('col-chord');
+
+  const payload = {
+    bg: bgEl ? bgEl.value : activeTheme.bg,
+    text: textEl ? textEl.value : activeTheme.text,
+    chord: chordEl ? chordEl.value : activeTheme.chord,
+    showChords: Boolean(activeTheme.showChords)
+  };
+  await sendThemeUpdate(payload);
+}
+
+async function toggleChordsVisibility() {
+  if (!currentState || !currentState.canPresent) return;
+  const nextShow = !Boolean(activeTheme.showChords);
+  activeTheme.showChords = nextShow;
+  updateChordsToggleButton();
+  draw();
+  await sendThemeUpdate({ showChords: nextShow });
 }
 
 async function saveThemePreset() {
@@ -1616,11 +2976,12 @@ function updateBottomBar(state, connected = true) {
   const ipEl = document.getElementById('srv-ip');
   const toggleBtn = document.getElementById('btn-srv-toggle');
   updateServerPowerIcon(connected);
+  updateChordsToggleButton();
   if (!playerBar || !toggleBtn) return;
 
-  const show = Boolean(state && state.canPresent && presenterModeOpen && !isAnySubViewOpen());
-  playerBar.classList.toggle('hidden', !show);
-  if (!show) return;
+  const showPresenterBar = Boolean(state && state.canPresent && presenterModeOpen && !isAnySubViewOpen());
+  playerBar.classList.toggle('hidden', !showPresenterBar);
+  if (!showPresenterBar) return;
 
   const ip = state.ip || '127.0.0.1';
   const port = state.port || 8080;
@@ -1644,10 +3005,22 @@ async function copyWifiAddress() {
   if (!currentState) return;
   const url = `http://${currentState.ip}:${currentState.port}`;
   try {
-    await navigator.clipboard.writeText(url);
-    document.getElementById('meta').textContent = `Skopiowano: ${url}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const tmp = document.createElement('textarea');
+      tmp.value = url;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      tmp.remove();
+    }
+    showCopiedButtonState();
+    const statusEl = document.getElementById('qr-status-text');
+    if (statusEl) statusEl.textContent = `Skopiowano adres: ${url}`;
   } catch (_) {
-    document.getElementById('meta').textContent = url;
+    const statusEl = document.getElementById('qr-status-text');
+    if (statusEl) statusEl.textContent = url;
   }
 }
 
@@ -1667,7 +3040,13 @@ async function toggleServerState() {
 
 async function shutdownProgram() {
   if (!currentState || !currentState.canPresent) return;
-  if (!confirm('Czy na pewno odłączyć wszystkich klientów i całkowicie zamknąć program?')) return;
+  const ok = await askAppConfirm(
+    'Zamknij serwer',
+    'Odłączyć klientów i zamknąć program?',
+    'Zamknij',
+    'btn-sm btn-danger-inline'
+  );
+  if (!ok) return;
 
   try {
     await fetch('/api/shutdown', { method: 'POST' });
@@ -1677,6 +3056,8 @@ async function shutdownProgram() {
   closeQrModal();
   closePlaylistSelectModal();
   closeDisplayModal();
+  closePdfExportModal();
+  closeAddToPlaylistModal();
   currentState = null;
   updateBottomBar(null, false);
   document.getElementById('meta').textContent = 'Program został zamknięty.';
@@ -1802,10 +3183,12 @@ async function toggleSongsView() {
   closeDisplayModal();
   closePlaylistSelectModal();
   closeQrModal();
+  closePdfExportModal();
+  closeAddToPlaylistModal();
   songsViewOpen = !songsViewOpen;
   updateUiVisibility();
   if (songsViewOpen) {
-    await loadSongsCatalog();
+    await Promise.all([loadSongsCatalog(), fetchPlaylistsData()]);
     window.scrollTo({ top: 0, behavior: 'auto' });
   } else {
     resize();
@@ -1820,6 +3203,7 @@ function updateUiVisibility() {
   const btnSongsLabel = document.getElementById('btn-songs-label');
   const btnPlSelect = document.getElementById('btn-pl-select');
   const btnDisplay = document.getElementById('btn-display-modal');
+  const btnPdf = document.getElementById('btn-pdf-export');
   const btnQr = document.getElementById('btn-qr');
   const btnSrvPower = document.getElementById('btn-srv-power');
   const songsView = document.getElementById('songs-view');
@@ -1832,6 +3216,8 @@ function updateUiVisibility() {
     closeQrModal();
     closePlaylistSelectModal();
     closeDisplayModal();
+    closePdfExportModal();
+    closeAddToPlaylistModal();
   }
 
   btnSongsView.classList.toggle('hidden', !isPresenter);
@@ -1841,7 +3227,7 @@ function updateUiVisibility() {
   btnSongsView.title = songsViewOpen ? 'Wróć do prezentacji' : 'Piosenki';
   btnSongsView.classList.toggle('active', songsViewOpen);
 
-  canvas.classList.toggle('hidden', isAnySubViewOpen());
+  stageWrap.classList.toggle('hidden', isAnySubViewOpen());
   songsView.classList.toggle('hidden', !songsViewOpen);
   plEditorView.classList.toggle('hidden', !playlistEditorOpen);
 
@@ -1849,13 +3235,15 @@ function updateUiVisibility() {
     btnPresenter.classList.add('hidden');
     btnPlSelect.classList.add('hidden');
     btnDisplay.classList.add('hidden');
+    if (btnPdf) btnPdf.classList.add('hidden');
     btnQr.classList.add('hidden');
     btnSrvPower.classList.toggle('hidden', !serverShutdownDone);
     updateBottomBar(null, false);
     return;
   }
 
-  const showNav = isPresenter && !isAnySubViewOpen();
+  const inSubView = isPresenter && isAnySubViewOpen();
+  const showNav = isPresenter && !inSubView;
   btnPresenter.classList.toggle('hidden', !showNav);
   btnPresenter.classList.toggle('panel-hidden', !presenterModeOpen);
   if (iconBustOn) iconBustOn.classList.toggle('hidden', !presenterModeOpen);
@@ -1864,6 +3252,13 @@ function updateUiVisibility() {
 
   btnPlSelect.classList.toggle('hidden', !isPresenter);
   btnDisplay.classList.toggle('hidden', !isPresenter);
+  btnDisplay.classList.toggle('active', inSubView);
+  btnDisplay.title = inSubView ? 'Wróć do prezentacji' : 'Prezentacja i motyw';
+
+  if (btnPdf) {
+    btnPdf.classList.toggle('hidden', !isPresenter);
+    btnPdf.disabled = !currentState.songTitle && catalogSongs.length === 0;
+  }
   btnQr.classList.toggle('hidden', !isPresenter);
   btnSrvPower.classList.toggle('hidden', !isPresenter);
 
@@ -1906,9 +3301,10 @@ function wrapParagraph(text, maxWidth, isChord) {
 
 function prepareSlideLines(rawSlideText, maxWidth) {
   const lines = [];
+  const showChords = shouldRenderChords();
   for (const rawLine of (rawSlideText || '').split('\n')) {
     if (rawLine.startsWith(CHORD_PREFIX)) {
-      if (!activeTheme.showChords) continue;
+      if (!showChords) continue;
       const chordText = rawLine.slice(CHORD_PREFIX.length);
       lines.push(...wrapParagraph(chordText, maxWidth, true));
     } else {
@@ -1983,6 +3379,10 @@ function renderToolbar(state, forceTimerReset = false) {
   updateBottomBar(state, true);
   resetAutoTimer(state, forceTimerReset);
 
+  if (state && !state.canPresent) {
+    recordParticipantTempBuffer(state);
+  }
+
   const plLabel = document.getElementById('active-playlist-label');
   if (plLabel) {
     if (state.playlistName) {
@@ -2046,6 +3446,9 @@ async function loadSongsCatalog() {
     renderSongCatalog();
     if (playlistEditorOpen) {
       renderPlaylistSongLists();
+    }
+    if (!document.getElementById('pl-select-modal-backdrop').classList.contains('hidden')) {
+      renderPlaylistHoverPreview(previewedPlaylistFilename);
     }
     if (editingFilename) {
       const found = catalogSongs.find(s => s.filename === editingFilename);
@@ -2161,16 +3564,16 @@ async function saveCurrentSong() {
   const payload = {
     filename: editingFilename || '',
     title: document.getElementById('f-title').value.trim(),
-    key: document.getElementById('f-key').value.trim(),
-    time_sig: document.getElementById('f-time-sig').value.trim(),
+    key: document.getElementById('f-key').value.trim().slice(0, 5),
+    time_sig: document.getElementById('f-time-sig').value.trim().slice(0, 5),
     author: document.getElementById('f-author').value.trim(),
-    tempo: document.getElementById('f-tempo').value.trim(),
-    hymn_number: document.getElementById('f-hymn-number').value.trim(),
+    tempo: document.getElementById('f-tempo').value.trim().slice(0, 4),
+    hymn_number: document.getElementById('f-hymn-number').value.trim().slice(0, 5),
     presentation: document.getElementById('f-presentation').value.trim(),
     lyrics: document.getElementById('f-lyrics').value,
     automatic: document.getElementById('f-automatic').checked,
-    slide_seconds: Math.max(0, parseInt(document.getElementById('f-slide-seconds').value || '0', 10) || 0),
-    next_song_delay_seconds: nextSongDelay
+    slide_seconds: Math.max(0, Math.min(9999, parseInt(document.getElementById('f-slide-seconds').value || '0', 10) || 0)),
+    next_song_delay_seconds: Math.min(9999, nextSongDelay)
   };
 
   try {
@@ -2199,7 +3602,8 @@ async function saveCurrentSong() {
 
 async function deleteCurrentSong() {
   if (!editingFilename) return;
-  if (!confirm(`Czy na pewno usunąć plik songs/${editingFilename}?`)) return;
+  const ok = await askAppConfirm('Usuń piosenkę', `Usunąć plik songs/${editingFilename}?`, 'Usuń');
+  if (!ok) return;
 
   try {
     const res = await fetch('/api/songs/delete', {
@@ -2266,9 +3670,15 @@ canvas.addEventListener('touchend', event => {
 
 window.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
+    if (pendingConfirmResolver) {
+      resolveAppConfirm(false);
+      return;
+    }
     closeQrModal();
     closePlaylistSelectModal();
     closeDisplayModal();
+    closePdfExportModal();
+    closeAddToPlaylistModal();
     return;
   }
   if (!currentState || !currentState.canPresent || isAnySubViewOpen()) return;
