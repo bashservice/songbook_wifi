@@ -116,6 +116,10 @@ button {
   font-size: 13px;
 }
 button:hover { background: #374151; }
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 button.active {
   border-color: #60a5fa;
   background: #1e3a5f;
@@ -146,6 +150,11 @@ button.nav-songs {
   border-color: #14b8a6;
   font-weight: 600;
 }
+button.btn-playlist {
+  background: #1e3a5f;
+  border-color: #3b82f6;
+  font-weight: 600;
+}
 button.btn-save {
   background: #16a34a;
   border-color: #22c55e;
@@ -162,6 +171,15 @@ button.btn-danger-right {
   gap: 6px;
 }
 button.btn-danger-right:hover {
+  background: #7f1d1d;
+}
+button.btn-danger-inline {
+  background: #450a0a;
+  border-color: #dc2626;
+  color: #fecaca;
+  font-weight: 600;
+}
+button.btn-danger-inline:hover:not(:disabled) {
   background: #7f1d1d;
 }
 .shutdown-icon {
@@ -218,12 +236,13 @@ button.btn-srv-start {
   align-items: center;
   flex-wrap: wrap;
 }
-#songs {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
+.playlist-chip {
+  font-size: 12px;
+  color: #93c5fd;
+  background: #152238;
+  border: 1px solid #2b4c7e;
+  padding: 4px 9px;
+  border-radius: 999px;
 }
 .status-dot {
   width: 10px;
@@ -266,7 +285,6 @@ button.btn-srv-start {
   touch-action: manipulation;
 }
 
-/* Okienko QR otwierane dopiero po kliknięciu przycisku QR */
 .qr-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -282,11 +300,11 @@ button.btn-srv-start {
   border: 1px solid #3b4656;
   border-radius: 10px;
   padding: 18px 20px;
-  max-width: 360px;
+  max-width: 420px;
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
 }
@@ -295,6 +313,7 @@ button.btn-srv-start {
   font-size: 16px;
   font-weight: 700;
   color: #f3f4f6;
+  text-align: center;
 }
 .qr-modal-url {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -312,6 +331,7 @@ button.btn-srv-start {
   justify-content: center;
   min-height: 188px;
   min-width: 188px;
+  align-self: center;
 }
 .qr-status-text {
   font-size: 12px;
@@ -319,11 +339,41 @@ button.btn-srv-start {
   text-align: center;
   min-height: 18px;
 }
+.pl-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.pl-picker-item {
+  text-align: left;
+  background: #232a35;
+  border: 1px solid #364152;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pl-picker-item.selected {
+  border-color: #60a5fa;
+  background: #1e3a5f;
+}
+.pl-picker-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+.pl-picker-meta {
+  font-size: 12px;
+  color: #9ca3af;
+}
 
+#playlist-editor-view,
 #songs-view {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 310px minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
 }
@@ -344,12 +394,23 @@ button.btn-srv-start {
   flex: 1;
   min-width: 0;
 }
-#song-list {
+.pl-sidebar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#song-list,
+#pl-editor-list,
+#pl-available-list,
+#pl-selected-list {
   flex: 1 1 auto;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+#pl-editor-list {
+  max-height: 220px;
 }
 .song-item {
   text-align: left;
@@ -372,21 +433,23 @@ button.btn-srv-start {
   margin-top: 2px;
 }
 .song-editor {
-  padding: 16px 20px;
+  padding: 14px 18px 24px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
 }
 .editor-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .editor-header h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
 }
 .file-badge {
   font-size: 12px;
@@ -401,6 +464,83 @@ button.btn-srv-start {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
+.pl-datetime-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pl-dt-field {
+  flex: 0 0 auto;
+}
+.pl-dt-field input.compact-date {
+  width: 148px;
+  font-variant-numeric: tabular-nums;
+}
+.pl-dt-field input.compact-time {
+  width: 112px;
+  font-variant-numeric: tabular-nums;
+}
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-with-icon input[type="text"] {
+  padding-right: 36px;
+}
+.icon-trigger-btn {
+  position: absolute;
+  right: 3px;
+  padding: 3px 6px;
+  background: #252c37;
+  border-color: #3d4756;
+  font-size: 13px;
+  line-height: 1;
+}
+.hidden-picker {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+}
+.pl-lists-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.pl-box {
+  background: #161a20;
+  border: 1px solid #2b323d;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+}
+.pl-box-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+.pl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #1f242d;
+  border: 1px solid #2e3643;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.pl-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .span-2 { grid-column: span 2; }
 .span-3 { grid-column: span 3; }
 label.field {
@@ -410,23 +550,23 @@ label.field {
   font-size: 12px;
   color: #cbd5e1;
 }
-input[type="text"], input[type="number"], textarea {
+input[type="text"], input[type="number"], select, textarea {
   width: 100%;
   background: #1c2026;
   color: #f3f4f6;
   border: 1px solid #3d4756;
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 7px 9px;
   font-size: 14px;
   font-family: inherit;
 }
 textarea {
-  min-height: 240px;
+  min-height: 220px;
   resize: vertical;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   line-height: 1.45;
 }
-input:focus, textarea:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: #60a5fa;
 }
@@ -439,9 +579,11 @@ input:focus, textarea:focus {
 }
 .editor-actions {
   display: flex;
+  flex: 0 0 auto;
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  padding-top: 4px;
 }
 .status-msg {
   font-size: 13px;
@@ -451,15 +593,36 @@ input:focus, textarea:focus {
 .status-err { color: #f87171; }
 
 @media (max-width: 820px) {
+  html, body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+  #playlist-editor-view,
   #songs-view {
-    grid-template-columns: 1fr;
-    grid-template-rows: 220px 1fr;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    flex: 1 0 auto;
   }
   .songs-sidebar {
     border-right: none;
     border-bottom: 1px solid #2b323d;
+    flex: 0 0 auto;
   }
-  .form-grid {
+  #pl-editor-list {
+    max-height: 150px;
+  }
+  #song-list {
+    max-height: 160px;
+  }
+  .song-editor {
+    overflow-y: visible;
+    padding: 12px 12px 28px;
+    flex: 0 0 auto;
+  }
+  .form-grid,
+  .pl-lists-grid {
     grid-template-columns: 1fr;
   }
   .span-2, .span-3 { grid-column: span 1; }
@@ -487,12 +650,14 @@ input:focus, textarea:focus {
       <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
   </button>
+  <div id="presenter-controls" class="hidden">
+    <button type="button" id="btn-pl-select" class="btn-playlist" onclick="openPlaylistSelectModal()">Wybierz playlistę</button>
+    <button type="button" id="btn-pl-create" class="btn-playlist" onclick="openPlaylistEditor()">Utwórz playlistę</button>
+    <span id="active-playlist-label" class="playlist-chip hidden"></span>
+  </div>
   <button id="btn-songs-view" class="nav-songs hidden" onclick="toggleSongsView()">
     Piosenki
   </button>
-  <div id="presenter-controls" class="hidden">
-    <div id="songs"></div>
-  </div>
   <div class="info" id="meta">Łączenie...</div>
 </div>
 
@@ -532,6 +697,69 @@ input:focus, textarea:focus {
     <button type="button" id="btn-next" class="btn-transport" title="Dalej" onclick="manualStep('next')">►</button>
     <button type="button" id="btn-srv-toggle" class="btn-srv-stop" onclick="toggleServerState()">● [Stop]</button>
   </div>
+</div>
+
+<div id="playlist-editor-view" class="hidden">
+  <aside class="songs-sidebar">
+    <div class="pl-box-title">Wczytaj playlistę</div>
+    <div class="pl-sidebar-actions">
+      <button type="button" class="btn-save btn-sm" onclick="resetPlaylistForm()">Nowa playlista</button>
+      <button type="button" id="btn-pl-delete" class="btn-danger-inline btn-sm" onclick="deleteSelectedPlaylist()" disabled>Skasuj playlistę</button>
+    </div>
+    <div id="pl-editor-list"></div>
+    <div class="song-item-sub">Kliknij nazwę, aby podświetlić i wczytać. Zmiana nazwy przy zapisie utworzy nowy plik JSON.</div>
+  </aside>
+
+  <section class="song-editor">
+    <div class="editor-header">
+      <h2 id="pl-editor-heading">Tworzenie playlisty</h2>
+      <button type="button" onclick="closePlaylistEditor()">← Powrót do prezentacji</button>
+    </div>
+
+    <div class="form-grid">
+      <label class="field span-3">
+        <span>Nazwa playlisty / uroczystości *</span>
+        <input type="text" id="pl-name" placeholder="np. Niedziela - Msza poranna" />
+      </label>
+    </div>
+
+    <div class="pl-datetime-row">
+      <label class="field pl-dt-field">
+        <span>Data</span>
+        <div class="input-with-icon">
+          <input type="text" id="pl-date" class="compact-date" placeholder="RRRR-MM-DD" />
+          <button type="button" class="icon-trigger-btn" title="Wybierz datę" onclick="openDatePicker()">📅</button>
+          <input type="date" id="pl-date-picker" class="hidden-picker" onchange="onDatePickerChange(this.value)" />
+        </div>
+      </label>
+      <label class="field pl-dt-field">
+        <span>Godzina</span>
+        <div class="input-with-icon">
+          <input type="text" id="pl-time" class="compact-time" placeholder="GG:MM" />
+          <button type="button" class="icon-trigger-btn" title="Wybierz godzinę" onclick="openTimePicker()">🕒</button>
+          <input type="time" id="pl-time-picker" class="hidden-picker" onchange="onTimePickerChange(this.value)" />
+        </div>
+      </label>
+    </div>
+
+    <div class="pl-lists-grid">
+      <div class="pl-box">
+        <div class="pl-box-title">Dostępne utwory (kliknij Dodaj)</div>
+        <div id="pl-available-list"></div>
+      </div>
+      <div class="pl-box">
+        <div class="pl-box-title">Utwory w playliście</div>
+        <div id="pl-selected-list"></div>
+      </div>
+    </div>
+
+    <div id="pl-editor-status" class="status-msg"></div>
+
+    <div class="editor-actions">
+      <button type="button" class="btn-save" onclick="savePlaylist()">Zapisz</button>
+      <button type="button" onclick="closePlaylistEditor()">Anuluj</button>
+    </div>
+  </section>
 </div>
 
 <div id="songs-view" class="hidden">
@@ -630,13 +858,27 @@ input:focus, textarea:focus {
   </div>
 </div>
 
+<div id="pl-select-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onPlaylistSelectBackdropClick(event)">
+  <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="pl-select-modal-title">
+    <h3 id="pl-select-modal-title" class="qr-modal-title">Wybierz playlistę</h3>
+    <input type="text" id="pl-search-input" placeholder="Szukaj po nazwie lub dacie / godzinie..." oninput="renderPlaylistPicker()" />
+    <div id="pl-picker-list" class="pl-picker-list"></div>
+    <button type="button" class="btn-sm" onclick="closePlaylistSelectModal()">Zamknij</button>
+  </div>
+</div>
+
 <script>
 const canvas = document.getElementById('stage');
 const ctx = canvas.getContext('2d');
 let currentState = null;
 let presenterModeOpen = true;
 let songsViewOpen = false;
+let playlistEditorOpen = false;
 let catalogSongs = [];
+let allPlaylists = [];
+let activePlaylistFilename = '';
+let selectedEditorPlaylistFilename = '';
+let draftPlaylistSongs = [];
 let editingFilename = null;
 let resizeObserver = null;
 let themesLoadedOnce = false;
@@ -658,6 +900,404 @@ const DEFAULT_THEME = {
 };
 
 let activeTheme = { ...DEFAULT_THEME };
+
+function isAnySubViewOpen() {
+  return songsViewOpen || playlistEditorOpen;
+}
+
+function openDatePicker() {
+  const picker = document.getElementById('pl-date-picker');
+  const txt = document.getElementById('pl-date');
+  if (!picker) return;
+  if (txt && /^\d{4}-\d{2}-\d{2}$/.test(txt.value.trim())) {
+    picker.value = txt.value.trim();
+  }
+  if (typeof picker.showPicker === 'function') {
+    picker.showPicker();
+  } else {
+    picker.click();
+  }
+}
+
+function onDatePickerChange(val) {
+  const txt = document.getElementById('pl-date');
+  if (txt && val) {
+    txt.value = val;
+  }
+}
+
+function openTimePicker() {
+  const picker = document.getElementById('pl-time-picker');
+  const txt = document.getElementById('pl-time');
+  if (!picker) return;
+  if (txt && /^\d{2}:\d{2}$/.test(txt.value.trim())) {
+    picker.value = txt.value.trim();
+  }
+  if (typeof picker.showPicker === 'function') {
+    picker.showPicker();
+  } else {
+    picker.click();
+  }
+}
+
+function onTimePickerChange(val) {
+  const txt = document.getElementById('pl-time');
+  if (txt && val) {
+    txt.value = val;
+  }
+}
+
+async function openPlaylistSelectModal() {
+  if (!currentState || !currentState.canPresent) return;
+  await fetchPlaylistsData();
+  const inp = document.getElementById('pl-search-input');
+  if (inp) inp.value = '';
+  renderPlaylistPicker();
+  document.getElementById('pl-select-modal-backdrop').classList.remove('hidden');
+  if (inp) inp.focus();
+}
+
+function closePlaylistSelectModal() {
+  document.getElementById('pl-select-modal-backdrop').classList.add('hidden');
+}
+
+function onPlaylistSelectBackdropClick(event) {
+  if (event.target && event.target.id === 'pl-select-modal-backdrop') {
+    closePlaylistSelectModal();
+  }
+}
+
+async function fetchPlaylistsData() {
+  try {
+    const res = await fetch('/api/playlists', { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    allPlaylists = data.playlists || [];
+    activePlaylistFilename = data.activeFilename || '';
+  } catch (_) {}
+}
+
+function renderPlaylistPicker() {
+  const listEl = document.getElementById('pl-picker-list');
+  const query = (document.getElementById('pl-search-input').value || '').toLowerCase().trim();
+  const tokens = query ? query.split(/\s+/) : [];
+  listEl.replaceChildren();
+
+  const filtered = allPlaylists.filter(pl => {
+    if (tokens.length === 0) return true;
+    const hay = `${pl.name || ''} ${pl.schedule || ''} ${pl.date || ''} ${pl.time || ''}`.toLowerCase();
+    return tokens.every(tok => hay.includes(tok));
+  });
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'pl-picker-meta';
+    empty.textContent = 'Brak pasujących playlist.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(pl => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pl-picker-item' + (pl.filename === activePlaylistFilename ? ' selected' : '');
+
+    const title = document.createElement('div');
+    title.className = 'pl-picker-name';
+    title.textContent = pl.name || pl.filename;
+
+    const meta = document.createElement('div');
+    meta.className = 'pl-picker-meta';
+    const count = Array.isArray(pl.songs) ? pl.songs.length : 0;
+    meta.textContent = [pl.schedule, `${count} utworów`].filter(Boolean).join(' • ');
+
+    btn.appendChild(title);
+    btn.appendChild(meta);
+    btn.onclick = () => selectPlaylistByFilename(pl.filename);
+    listEl.appendChild(btn);
+  });
+}
+
+async function selectPlaylistByFilename(filename) {
+  try {
+    const res = await fetch('/api/playlists/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ filename })
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      allPlaylists = data.playlists ? (data.playlists.playlists || allPlaylists) : allPlaylists;
+      activePlaylistFilename = filename;
+      if (data.state) {
+        currentState = data.state;
+        renderToolbar(currentState, true);
+      }
+      closePlaylistSelectModal();
+      draw();
+    }
+  } catch (_) {}
+}
+
+async function openPlaylistEditor() {
+  if (!currentState || !currentState.canPresent) return;
+  songsViewOpen = false;
+  playlistEditorOpen = true;
+  closePlaylistSelectModal();
+  updateUiVisibility();
+  await Promise.all([loadSongsCatalog(), fetchPlaylistsData()]);
+  if (!selectedEditorPlaylistFilename && allPlaylists.length > 0) {
+    const initial = allPlaylists.find(p => p.filename === activePlaylistFilename) || allPlaylists[0];
+    if (initial) {
+      onSelectPlaylistToEdit(initial.filename);
+    } else {
+      resetPlaylistForm();
+    }
+  } else {
+    renderPlaylistEditorList();
+    updateDeletePlaylistButton();
+    renderPlaylistSongLists();
+  }
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function closePlaylistEditor() {
+  playlistEditorOpen = false;
+  updateUiVisibility();
+  resize();
+}
+
+function updateDeletePlaylistButton() {
+  const delBtn = document.getElementById('btn-pl-delete');
+  if (!delBtn) return;
+  const exists = Boolean(
+    selectedEditorPlaylistFilename &&
+    allPlaylists.some(p => p.filename === selectedEditorPlaylistFilename)
+  );
+  delBtn.disabled = !exists;
+}
+
+function renderPlaylistEditorList() {
+  const listEl = document.getElementById('pl-editor-list');
+  if (!listEl) return;
+  listEl.replaceChildren();
+
+  if (allPlaylists.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'song-item-sub';
+    empty.style.padding = '8px';
+    empty.textContent = 'Brak zapisanych playlist.';
+    listEl.appendChild(empty);
+    return;
+  }
+
+  allPlaylists.forEach(pl => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'song-item' + (pl.filename === selectedEditorPlaylistFilename ? ' selected' : '');
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'song-item-title';
+    titleEl.textContent = pl.name || pl.filename;
+
+    const subEl = document.createElement('div');
+    subEl.className = 'song-item-sub';
+    const count = Array.isArray(pl.songs) ? pl.songs.length : 0;
+    subEl.textContent = [pl.schedule, `${count} utworów`].filter(Boolean).join(' • ');
+
+    btn.appendChild(titleEl);
+    btn.appendChild(subEl);
+    btn.onclick = () => onSelectPlaylistToEdit(pl.filename);
+    listEl.appendChild(btn);
+  });
+}
+
+function onSelectPlaylistToEdit(filename) {
+  if (!filename) {
+    resetPlaylistForm();
+    return;
+  }
+  const found = allPlaylists.find(p => p.filename === filename);
+  if (!found) return;
+  selectedEditorPlaylistFilename = found.filename;
+  document.getElementById('pl-editor-heading').textContent = 'Edycja playlisty (zapis utworzy nowy plik przy zmianie nazwy)';
+  document.getElementById('pl-name').value = found.name || '';
+  document.getElementById('pl-date').value = found.date || '';
+  document.getElementById('pl-time').value = found.time || '';
+  draftPlaylistSongs = Array.isArray(found.songs) ? [...found.songs] : [];
+  setPlaylistStatus('', false);
+  renderPlaylistEditorList();
+  updateDeletePlaylistButton();
+  renderPlaylistSongLists();
+}
+
+function resetPlaylistForm() {
+  selectedEditorPlaylistFilename = '';
+  const now = new Date();
+  document.getElementById('pl-editor-heading').textContent = 'Tworzenie playlisty';
+  document.getElementById('pl-name').value = '';
+  document.getElementById('pl-date').value = now.toISOString().slice(0, 10);
+  document.getElementById('pl-time').value = now.toTimeString().slice(0, 5);
+  draftPlaylistSongs = [];
+  setPlaylistStatus('', false);
+  renderPlaylistEditorList();
+  updateDeletePlaylistButton();
+  renderPlaylistSongLists();
+}
+
+async function deleteSelectedPlaylist() {
+  if (!selectedEditorPlaylistFilename) return;
+  const target = allPlaylists.find(p => p.filename === selectedEditorPlaylistFilename);
+  const label = (target && target.name) || selectedEditorPlaylistFilename;
+  if (!confirm(`Czy na pewno skasować playlistę "${label}"?`)) return;
+
+  try {
+    const res = await fetch('/api/playlists/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ filename: selectedEditorPlaylistFilename })
+    });
+    const rawText = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch (_) {
+      setPlaylistStatus(rawText || 'Błąd odpowiedzi serwera podczas usuwania playlisty.', true);
+      return;
+    }
+
+    if (!res.ok || !data || !data.ok) {
+      setPlaylistStatus((data && data.error) || 'Nie udało się skasować playlisty.', true);
+      return;
+    }
+
+    allPlaylists = data.playlists ? (data.playlists.playlists || []) : [];
+    activePlaylistFilename = data.playlists ? (data.playlists.activeFilename || '') : '';
+    if (data.state) {
+      currentState = data.state;
+      renderToolbar(currentState, true);
+    }
+
+    if (allPlaylists.length > 0) {
+      onSelectPlaylistToEdit(allPlaylists[0].filename);
+    } else {
+      resetPlaylistForm();
+    }
+    setPlaylistStatus(`Skasowano playlistę "${label}".`, false);
+  } catch (_) {
+    setPlaylistStatus('Brak połączenia z serwerem podczas usuwania playlisty.', true);
+  }
+}
+
+function renderPlaylistSongLists() {
+  const availEl = document.getElementById('pl-available-list');
+  const selEl = document.getElementById('pl-selected-list');
+  if (!availEl || !selEl) return;
+
+  availEl.replaceChildren();
+  catalogSongs.forEach(song => {
+    const row = document.createElement('div');
+    row.className = 'pl-row';
+
+    const label = document.createElement('span');
+    label.textContent = song.title || song.filename;
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'btn-sm btn-save';
+    addBtn.textContent = 'Dodaj';
+    addBtn.onclick = () => {
+      draftPlaylistSongs.push(song.filename);
+      renderPlaylistSongLists();
+    };
+
+    row.appendChild(label);
+    row.appendChild(addBtn);
+    availEl.appendChild(row);
+  });
+
+  selEl.replaceChildren();
+  if (draftPlaylistSongs.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'song-item-sub';
+    empty.textContent = 'Brak utworów w playliście.';
+    selEl.appendChild(empty);
+    return;
+  }
+
+  draftPlaylistSongs.forEach((fname, idx) => {
+    const songObj = catalogSongs.find(s => s.filename === fname);
+    const row = document.createElement('div');
+    row.className = 'pl-row';
+
+    const label = document.createElement('span');
+    label.textContent = `${idx + 1}. ${(songObj && songObj.title) || fname}`;
+
+    const rmBtn = document.createElement('button');
+    rmBtn.type = 'button';
+    rmBtn.className = 'btn-sm';
+    rmBtn.textContent = 'Usuń';
+    rmBtn.onclick = () => {
+      draftPlaylistSongs.splice(idx, 1);
+      renderPlaylistSongLists();
+    };
+
+    row.appendChild(label);
+    row.appendChild(rmBtn);
+    selEl.appendChild(row);
+  });
+}
+
+async function savePlaylist() {
+  const payload = {
+    name: (document.getElementById('pl-name').value || '').trim(),
+    date: (document.getElementById('pl-date').value || '').trim(),
+    time: (document.getElementById('pl-time').value || '').trim(),
+    songs: draftPlaylistSongs
+  };
+
+  try {
+    const res = await fetch('/api/playlists/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const rawText = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(rawText);
+    } catch (_) {
+      setPlaylistStatus(rawText || 'Błąd odpowiedzi serwera podczas zapisu playlisty.', true);
+      return;
+    }
+
+    if (!res.ok || !data || !data.ok) {
+      setPlaylistStatus((data && data.error) || 'Nie udało się zapisać playlisty.', true);
+      return;
+    }
+    if (data.playlists) {
+      allPlaylists = data.playlists.playlists || allPlaylists;
+      activePlaylistFilename = data.playlists.activeFilename || data.filename;
+    }
+    if (data.state) {
+      currentState = data.state;
+      renderToolbar(currentState, true);
+    }
+    selectedEditorPlaylistFilename = data.filename || selectedEditorPlaylistFilename;
+    renderPlaylistEditorList();
+    updateDeletePlaylistButton();
+    setPlaylistStatus(`Zapisano playlistę jako playlists/${data.filename}`, false);
+  } catch (_) {
+    setPlaylistStatus('Brak połączenia z serwerem (sprawdź czy działa cargo run).', true);
+  }
+}
+
+function setPlaylistStatus(message, isError) {
+  const el = document.getElementById('pl-editor-status');
+  if (!el) return;
+  el.textContent = message;
+  el.className = 'status-msg ' + (message ? (isError ? 'status-err' : 'status-ok') : '');
+}
 
 function openQrModal() {
   if (!currentState || !currentState.canPresent) return;
@@ -891,7 +1531,7 @@ function updateBottomBar(state, connected = true) {
   const toggleBtn = document.getElementById('btn-srv-toggle');
   if (!playerBar || !bar || !dot || !ipEl || !toggleBtn) return;
 
-  const show = Boolean(state && state.canPresent && presenterModeOpen && !songsViewOpen);
+  const show = Boolean(state && state.canPresent && presenterModeOpen && !isAnySubViewOpen());
   playerBar.classList.toggle('hidden', !show);
   bar.classList.toggle('hidden', !show);
   if (!show) return;
@@ -947,10 +1587,10 @@ async function shutdownProgram() {
 
   try {
     await fetch('/api/shutdown', { method: 'POST' });
-  } catch (_) {
-  }
+  } catch (_) {}
 
   closeQrModal();
+  closePlaylistSelectModal();
   currentState = null;
   updateBottomBar(null, false);
   document.getElementById('meta').textContent = 'Program został zamknięty.';
@@ -1029,7 +1669,7 @@ setInterval(() => {
     !currentState.canPresent ||
     !isServerActive(currentState, true) ||
     playbackPaused ||
-    songsViewOpen ||
+    isAnySubViewOpen() ||
     !presenterModeOpen
   ) return;
   const slideSec = getActiveSlideSeconds(currentState);
@@ -1076,6 +1716,7 @@ function togglePresenter() {
 
 async function toggleSongsView() {
   if (!currentState || !currentState.canPresent) return;
+  playlistEditorOpen = false;
   songsViewOpen = !songsViewOpen;
   updateUiVisibility();
   if (songsViewOpen) {
@@ -1093,23 +1734,27 @@ function updateUiVisibility() {
   const controls = document.getElementById('presenter-controls');
   const themeBar = document.getElementById('theme-bar');
   const songsView = document.getElementById('songs-view');
+  const plEditorView = document.getElementById('playlist-editor-view');
 
   const isPresenter = Boolean(currentState && currentState.canPresent);
   if (!isPresenter) {
     songsViewOpen = false;
+    playlistEditorOpen = false;
     closeQrModal();
+    closePlaylistSelectModal();
   }
 
   btnSongsView.classList.toggle('hidden', !isPresenter);
   btnSongsView.textContent = songsViewOpen ? '← Prezentacja' : 'Piosenki';
   btnSongsView.classList.toggle('active', songsViewOpen);
 
-  canvas.classList.toggle('hidden', songsViewOpen);
+  canvas.classList.toggle('hidden', isAnySubViewOpen());
   songsView.classList.toggle('hidden', !songsViewOpen);
+  plEditorView.classList.toggle('hidden', !playlistEditorOpen);
 
   if (!currentState) return;
 
-  if (isPresenter && !songsViewOpen) {
+  if (isPresenter && !isAnySubViewOpen()) {
     btnPresenter.classList.remove('hidden');
     btnPresenter.classList.toggle('panel-hidden', !presenterModeOpen);
     if (iconBustOn) iconBustOn.classList.toggle('hidden', !presenterModeOpen);
@@ -1131,7 +1776,7 @@ function updateUiVisibility() {
 }
 
 function resize() {
-  if (songsViewOpen) return;
+  if (isAnySubViewOpen()) return;
   const rect = canvas.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
   const dpr = window.devicePixelRatio || 1;
@@ -1174,7 +1819,7 @@ function prepareSlideLines(rawSlideText, maxWidth) {
 }
 
 function draw() {
-  if (!currentState || songsViewOpen) return;
+  if (!currentState || isAnySubViewOpen()) return;
   const rect = canvas.getBoundingClientRect();
   const w = rect.width;
   const h = rect.height;
@@ -1237,6 +1882,20 @@ function renderToolbar(state, forceTimerReset = false) {
   updateUiVisibility();
   updateBottomBar(state, true);
   resetAutoTimer(state, forceTimerReset);
+
+  const plLabel = document.getElementById('active-playlist-label');
+  if (plLabel) {
+    if (state.playlistName) {
+      plLabel.textContent = state.playlistSchedule
+        ? `Playlista: ${state.playlistName} (${state.playlistSchedule})`
+        : `Playlista: ${state.playlistName}`;
+      plLabel.classList.remove('hidden');
+    } else {
+      plLabel.textContent = '';
+      plLabel.classList.add('hidden');
+    }
+  }
+
   const meta = document.getElementById('meta');
   const active = isServerActive(state, true);
   if (state.canPresent) {
@@ -1244,21 +1903,6 @@ function renderToolbar(state, forceTimerReset = false) {
   } else {
     meta.textContent = active ? 'Podgląd uczestnika' : 'Prezentacja wstrzymana';
   }
-  resize();
-  if (!state.canPresent) return;
-
-  const songsDiv = document.getElementById('songs');
-  songsDiv.replaceChildren();
-  const autoSongs = state.songs.filter(s => Boolean(s.automatic));
-  autoSongs.forEach(song => {
-    const button = document.createElement('button');
-    button.textContent = song.title;
-    if (song.index === state.songIndex) {
-      button.classList.add('active');
-    }
-    button.onclick = () => manualStep(`song:${song.index}`);
-    songsDiv.appendChild(button);
-  });
   resize();
 }
 
@@ -1299,6 +1943,9 @@ async function loadSongsCatalog() {
     if (!res.ok) throw new Error('Brak dostępu do listy piosenek');
     catalogSongs = await res.json();
     renderSongCatalog();
+    if (playlistEditorOpen) {
+      renderPlaylistSongLists();
+    }
     if (editingFilename) {
       const found = catalogSongs.find(s => s.filename === editingFilename);
       if (found) fillEditorForm(found);
@@ -1485,9 +2132,10 @@ function setEditorStatus(message, isError) {
 window.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     closeQrModal();
+    closePlaylistSelectModal();
     return;
   }
-  if (!currentState || !currentState.canPresent || songsViewOpen) return;
+  if (!currentState || !currentState.canPresent || isAnySubViewOpen()) return;
   if (event.key === 'ArrowRight' || event.key === ' ') {
     event.preventDefault();
     manualStep('next');

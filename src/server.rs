@@ -112,6 +112,184 @@ pub fn handle_client(mut stream: TcpStream, state: Arc<Mutex<AppState>>) {
             };
             write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &json);
         }
+        ("GET", "/api/playlists") => {
+            if !is_local {
+                write_response(
+                    &mut stream,
+                    "403 Forbidden",
+                    "text/plain; charset=utf-8",
+                    "Zarządzanie playlistami dostępne wyłącznie lokalnie.",
+                );
+                return;
+            }
+            let json = {
+                let mut guard = state.lock().unwrap();
+                guard.reload_songs(None);
+                guard.playlists_json()
+            };
+            write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &json);
+        }
+        ("POST", "/api/playlists/select") => {
+            if !is_local {
+                write_response(
+                    &mut stream,
+                    "403 Forbidden",
+                    "text/plain; charset=utf-8",
+                    "Wybór playlisty dostępny wyłącznie lokalnie.",
+                );
+                return;
+            }
+            let text = String::from_utf8_lossy(&body);
+            let Some(filename) = extract_string_field(&text, "filename") else {
+                write_response(
+                    &mut stream,
+                    "400 Bad Request",
+                    "application/json; charset=utf-8",
+                    r#"{"ok":false,"error":"Brak nazwy pliku playlisty"}"#,
+                );
+                return;
+            };
+            let result = {
+                let mut guard = state.lock().unwrap();
+                guard
+                    .select_playlist(&filename)
+                    .map(|_| (guard.playlists_json(), guard.to_json(is_local)))
+            };
+            match result {
+                Ok((playlists_json, state_json)) => {
+                    let resp = format!(
+                        r#"{{"ok":true,"playlists":{},"state":{}}}"#,
+                        playlists_json, state_json
+                    );
+                    write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &resp);
+                }
+                Err(err) => {
+                    let resp = format!(r#"{{"ok":false,"error":"{}"}}"#, escape_json(&err));
+                    write_response(
+                        &mut stream,
+                        "400 Bad Request",
+                        "application/json; charset=utf-8",
+                        &resp,
+                    );
+                }
+            }
+        }
+        ("POST", "/api/playlists/save") => {
+            if !is_local {
+                write_response(
+                    &mut stream,
+                    "403 Forbidden",
+                    "text/plain; charset=utf-8",
+                    "Zapis playlisty dostępny wyłącznie lokalnie.",
+                );
+                return;
+            }
+            let text = String::from_utf8_lossy(&body);
+            let Ok(Value::Object(map)) = parse(&text) else {
+                write_response(
+                    &mut stream,
+                    "400 Bad Request",
+                    "application/json; charset=utf-8",
+                    r#"{"ok":false,"error":"Nieprawidłowy JSON playlisty"}"#,
+                );
+                return;
+            };
+            let name = match map.get("name") {
+                Some(Value::String(s)) => s.clone(),
+                _ => String::new(),
+            };
+            let date = match map.get("date") {
+                Some(Value::String(s)) => s.clone(),
+                _ => String::new(),
+            };
+            let time = match map.get("time") {
+                Some(Value::String(s)) => s.clone(),
+                _ => String::new(),
+            };
+            let song_files = match map.get("songs") {
+                Some(Value::Array(arr)) => arr
+                    .iter()
+                    .filter_map(|v| match v {
+                        Value::String(s) => Some(s.clone()),
+                        _ => None,
+                    })
+                    .collect(),
+                _ => Vec::new(),
+            };
+
+            let result = {
+                let mut guard = state.lock().unwrap();
+                guard
+                    .save_playlist(&name, &date, &time, song_files)
+                    .map(|saved| (saved, guard.playlists_json(), guard.to_json(is_local)))
+            };
+
+            match result {
+                Ok((saved, playlists_json, state_json)) => {
+                    let resp = format!(
+                        r#"{{"ok":true,"filename":"{}","playlists":{},"state":{}}}"#,
+                        escape_json(&saved),
+                        playlists_json,
+                        state_json
+                    );
+                    write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &resp);
+                }
+                Err(err) => {
+                    let resp = format!(r#"{{"ok":false,"error":"{}"}}"#, escape_json(&err));
+                    write_response(
+                        &mut stream,
+                        "400 Bad Request",
+                        "application/json; charset=utf-8",
+                        &resp,
+                    );
+                }
+            }
+        }
+        ("POST", "/api/playlists/delete") => {
+            if !is_local {
+                write_response(
+                    &mut stream,
+                    "403 Forbidden",
+                    "text/plain; charset=utf-8",
+                    "Usuwanie playlisty dostępne wyłącznie lokalnie.",
+                );
+                return;
+            }
+            let text = String::from_utf8_lossy(&body);
+            let Some(filename) = extract_string_field(&text, "filename") else {
+                write_response(
+                    &mut stream,
+                    "400 Bad Request",
+                    "application/json; charset=utf-8",
+                    r#"{"ok":false,"error":"Brak nazwy pliku playlisty do usunięcia"}"#,
+                );
+                return;
+            };
+            let result = {
+                let mut guard = state.lock().unwrap();
+                guard
+                    .delete_playlist(&filename)
+                    .map(|_| (guard.playlists_json(), guard.to_json(is_local)))
+            };
+            match result {
+                Ok((playlists_json, state_json)) => {
+                    let resp = format!(
+                        r#"{{"ok":true,"playlists":{},"state":{}}}"#,
+                        playlists_json, state_json
+                    );
+                    write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &resp);
+                }
+                Err(err) => {
+                    let resp = format!(r#"{{"ok":false,"error":"{}"}}"#, escape_json(&err));
+                    write_response(
+                        &mut stream,
+                        "400 Bad Request",
+                        "application/json; charset=utf-8",
+                        &resp,
+                    );
+                }
+            }
+        }
         ("GET", "/api/themes") => {
             if !is_local {
                 write_response(
@@ -205,7 +383,12 @@ pub fn handle_client(mut stream: TcpStream, state: Arc<Mutex<AppState>>) {
                 }
                 Err(err) => {
                     let resp = format!(r#"{{"ok":false,"error":"{}"}}"#, escape_json(&err));
-                    write_response(&mut stream, "400 Bad Request", "application/json; charset=utf-8", &resp);
+                    write_response(
+                        &mut stream,
+                        "400 Bad Request",
+                        "application/json; charset=utf-8",
+                        &resp,
+                    );
                 }
             }
         }
@@ -242,7 +425,12 @@ pub fn handle_client(mut stream: TcpStream, state: Arc<Mutex<AppState>>) {
                 }
                 Err(err) => {
                     let resp = format!(r#"{{"ok":false,"error":"{}"}}"#, escape_json(&err));
-                    write_response(&mut stream, "400 Bad Request", "application/json; charset=utf-8", &resp);
+                    write_response(
+                        &mut stream,
+                        "400 Bad Request",
+                        "application/json; charset=utf-8",
+                        &resp,
+                    );
                 }
             }
         }

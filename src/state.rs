@@ -5,9 +5,10 @@ use std::net::{SocketAddr, UdpSocket};
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::json::{parse_song, SongJson};
+use crate::json::{parse_song, SongJson, Value};
 
 pub const SONGS_DIR: &str = "songs";
+pub const PLAYLISTS_DIR: &str = "playlists";
 pub const LOG_DIR: &str = "log";
 pub const LOG_FILE: &str = "log/songbookclear.log";
 pub const THEMES_FILE: &str = "themes.json";
@@ -64,6 +65,73 @@ impl SlideTheme {
 }
 
 #[derive(Clone)]
+pub struct PlaylistRecord {
+    pub filename: String,
+    pub name: String,
+    pub date: String,
+    pub time: String,
+    pub songs: Vec<String>,
+}
+
+impl PlaylistRecord {
+    pub fn schedule_label(&self) -> String {
+        let mut parts = Vec::new();
+        if !self.date.trim().is_empty() {
+            parts.push(self.date.trim().to_string());
+        }
+        if !self.time.trim().is_empty() {
+            parts.push(self.time.trim().to_string());
+        }
+        parts.join(" ")
+    }
+
+    pub fn to_json(&self) -> String {
+        let items: Vec<String> = self
+            .songs
+            .iter()
+            .map(|f| format!("\"{}\"", escape_json(f)))
+            .collect();
+        let schedule = self.schedule_label();
+        format!(
+            r#"{{"filename":"{}","name":"{}","date":"{}","time":"{}","schedule":"{}","songs":[{}]}}"#,
+            escape_json(&self.filename),
+            escape_json(&self.name),
+            escape_json(&self.date),
+            escape_json(&self.time),
+            escape_json(&schedule),
+            items.join(",")
+        )
+    }
+}
+
+/// Zaszyty w programie wzorzec struktury JSON dla nowej playlisty.
+pub fn build_playlist_json_from_template(
+    name: &str,
+    date: &str,
+    time: &str,
+    songs: &[String],
+) -> String {
+    let items: Vec<String> = songs
+        .iter()
+        .map(|f| format!("\"{}\"", escape_json(f)))
+        .collect();
+    format!(
+        concat!(
+            "{{\n",
+            "  \"name\": \"{}\",\n",
+            "  \"date\": \"{}\",\n",
+            "  \"time\": \"{}\",\n",
+            "  \"songs\": [{}]\n",
+            "}}\n"
+        ),
+        escape_json(name.trim()),
+        escape_json(date.trim()),
+        escape_json(time.trim()),
+        items.join(", ")
+    )
+}
+
+#[derive(Clone)]
 pub struct SongRecord {
     pub filename: String,
     pub data: SongJson,
@@ -73,7 +141,10 @@ pub struct SongRecord {
 
 #[derive(Clone)]
 pub struct AppState {
+    pub all_songs: Vec<SongRecord>,
     pub songs: Vec<SongRecord>,
+    pub playlists: Vec<PlaylistRecord>,
+    pub active_playlist: Option<String>,
     pub current_song: usize,
     pub current_slide: usize,
     pub local_ip: String,
@@ -94,15 +165,26 @@ impl AppState {
         if let Err(e) = fs::create_dir_all(SONGS_DIR) {
             log_warn(&format!("Nie udało się utworzyć katalogu '{SONGS_DIR}': {e}"));
         }
+        if let Err(e) = fs::create_dir_all(PLAYLISTS_DIR) {
+            log_warn(&format!(
+                "Nie udało się utworzyć katalogu '{PLAYLISTS_DIR}': {e}"
+            ));
+        }
         if let Err(e) = fs::create_dir_all(LOG_DIR) {
             eprintln!("[WARN] Nie udało się utworzyć katalogu '{LOG_DIR}': {e}");
         }
-        let songs = load_songs_from_dir(SONGS_DIR);
+        let all_songs = load_songs_from_dir(SONGS_DIR);
+        let playlists = load_playlists_from_dir(PLAYLISTS_DIR);
+        let active_playlist = playlists.first().map(|p| p.filename.clone());
+        let songs = resolve_active_songs(&all_songs, &playlists, active_playlist.as_deref());
         let saved_themes = load_themes_from_file(THEMES_FILE);
         let active_theme = saved_themes.first().cloned().unwrap_or_default();
 
         Self {
+            all_songs,
             songs,
+            playlists,
+            active_playlist,
             current_song: 0,
             current_slide: 0,
             local_ip: detect_local_ip().unwrap_or_else(|| "127.0.0.1".to_string()),
@@ -111,6 +193,106 @@ impl AppState {
             active_theme,
             saved_themes,
         }
+    }
+
+    pub fn active_playlist_record(&self) -> Option<&PlaylistRecord> {
+        let active_file = self.active_playlist.as_deref()?;
+        self.playlists.iter().find(|p| p.filename == active_file)
+    }
+
+    pub fn select_playlist(&mut self, filename: &str) -> Result<(), String> {
+        let safe = sanitize_filename(filename)?;
+        if !self.playlists.iter().any(|p| p.filename == safe) {
+            self.playlists = load_playlists_from_dir(PLAYLISTS_DIR);
+        }
+        if !self.playlists.iter().any(|p| p.filename == safe) {
+            return Err("Nie znaleziono wybranej playlisty.".to_string());
+        }
+        self.active_playlist = Some(safe);
+        self.songs =
+            resolve_active_songs(&self.all_songs, &self.playlists, self.active_playlist.as_deref());
+        self.current_song = 0;
+        self.current_slide = 0;
+        Ok(())
+    }
+
+    pub fn save_playlist(
+        &mut self,
+        name: &str,
+        date: &str,
+        time: &str,
+        song_filenames: Vec<String>,
+    ) -> Result<String, String> {
+        let clean_name = name.trim();
+        if clean_name.is_empty() {
+            return Err("Nazwa playlisty jest wymagana.".to_string());
+        }
+
+        fs::create_dir_all(PLAYLISTS_DIR).map_err(|e| {
+            let msg = format!("Nie można utworzyć katalogu {PLAYLISTS_DIR}: {e}");
+            log_warn(&msg);
+            msg
+        })?;
+
+        let valid_song_files: Vec<String> = song_filenames
+            .into_iter()
+            .filter(|f| self.all_songs.iter().any(|s| &s.filename == f))
+            .collect();
+
+        let target_filename = generate_unique_filename(PLAYLISTS_DIR, clean_name);
+        let json_body = build_playlist_json_from_template(
+            clean_name,
+            date,
+            time,
+            &valid_song_files,
+        );
+
+        let path = Path::new(PLAYLISTS_DIR).join(&target_filename);
+        fs::write(&path, json_body).map_err(|e| {
+            let msg = format!("Błąd zapisu playlisty {target_filename}: {e}");
+            log_warn(&msg);
+            msg
+        })?;
+
+        self.playlists = load_playlists_from_dir(PLAYLISTS_DIR);
+        self.active_playlist = Some(target_filename.clone());
+        self.songs =
+            resolve_active_songs(&self.all_songs, &self.playlists, self.active_playlist.as_deref());
+        self.current_song = 0;
+        self.current_slide = 0;
+        Ok(target_filename)
+    }
+
+    pub fn delete_playlist(&mut self, filename: &str) -> Result<(), String> {
+        let safe = sanitize_filename(filename)?;
+        let path = Path::new(PLAYLISTS_DIR).join(&safe);
+        if path.exists() {
+            fs::remove_file(&path).map_err(|e| {
+                let msg = format!("Nie udało się usunąć playlisty {safe}: {e}");
+                log_warn(&msg);
+                msg
+            })?;
+        }
+
+        self.playlists = load_playlists_from_dir(PLAYLISTS_DIR);
+        if self.active_playlist.as_deref() == Some(safe.as_str()) {
+            self.active_playlist = self.playlists.first().map(|p| p.filename.clone());
+        }
+        self.songs =
+            resolve_active_songs(&self.all_songs, &self.playlists, self.active_playlist.as_deref());
+        self.current_song = 0;
+        self.current_slide = 0;
+        Ok(())
+    }
+
+    pub fn playlists_json(&self) -> String {
+        let items: Vec<String> = self.playlists.iter().map(|p| p.to_json()).collect();
+        let active = self.active_playlist.as_deref().unwrap_or("");
+        format!(
+            r#"{{"activeFilename":"{}","playlists":[{}]}}"#,
+            escape_json(active),
+            items.join(",")
+        )
     }
 
     pub fn set_theme_live(
@@ -191,7 +373,10 @@ impl AppState {
             .map(|s| s.to_string())
             .or_else(|| self.songs.get(self.current_song).map(|s| s.filename.clone()));
 
-        self.songs = load_songs_from_dir(SONGS_DIR);
+        self.all_songs = load_songs_from_dir(SONGS_DIR);
+        self.playlists = load_playlists_from_dir(PLAYLISTS_DIR);
+        self.songs =
+            resolve_active_songs(&self.all_songs, &self.playlists, self.active_playlist.as_deref());
 
         if self.songs.is_empty() {
             self.current_song = 0;
@@ -314,6 +499,10 @@ impl AppState {
             .collect();
 
         let theme_json = self.active_theme.to_json();
+        let active_pl = self.active_playlist_record();
+        let playlist_name = active_pl.map(|p| p.name.as_str()).unwrap_or("");
+        let playlist_file = active_pl.map(|p| p.filename.as_str()).unwrap_or("");
+        let playlist_schedule = active_pl.map(|p| p.schedule_label()).unwrap_or_default();
 
         if let Some(song) = self.songs.get(self.current_song) {
             let slide_text = song
@@ -334,11 +523,14 @@ impl AppState {
                 .join(",");
 
             format!(
-                r#"{{"canPresent":{},"serverRunning":{},"ip":"{}","port":{},"songIndex":{},"slideIndex":{},"slideCount":{},"songTitle":"{}","slideText":"{}","automatic":{},"slideSeconds":{},"slideDurations":[{}],"nextSongDelaySeconds":{},"theme":{},"songs":[{}]}}"#,
+                r#"{{"canPresent":{},"serverRunning":{},"ip":"{}","port":{},"playlistName":"{}","playlistFile":"{}","playlistSchedule":"{}","songIndex":{},"slideIndex":{},"slideCount":{},"songTitle":"{}","slideText":"{}","automatic":{},"slideSeconds":{},"slideDurations":[{}],"nextSongDelaySeconds":{},"theme":{},"songs":[{}]}}"#,
                 is_local_presenter,
                 self.server_running,
                 escape_json(&self.local_ip),
                 self.port,
+                escape_json(playlist_name),
+                escape_json(playlist_file),
+                escape_json(&playlist_schedule),
                 self.current_song,
                 self.current_slide,
                 song.slides.len(),
@@ -353,11 +545,14 @@ impl AppState {
             )
         } else {
             format!(
-                r#"{{"canPresent":{},"serverRunning":{},"ip":"{}","port":{},"songIndex":0,"slideIndex":0,"slideCount":0,"songTitle":"Brak piosenek w katalogu {}/","slideText":"Otwórz zakładkę [Piosenki] na górnej belce, aby dodać pierwszy utwór.","automatic":false,"slideSeconds":0,"slideDurations":[],"nextSongDelaySeconds":3,"theme":{},"songs":[]}}"#,
+                r#"{{"canPresent":{},"serverRunning":{},"ip":"{}","port":{},"playlistName":"{}","playlistFile":"{}","playlistSchedule":"{}","songIndex":0,"slideIndex":0,"slideCount":0,"songTitle":"Brak piosenek w aktywnej playliście lub katalogu {}/","slideText":"Wybierz playlistę, utwórz nową lub dodaj utwór w zakładce [Piosenki].","automatic":false,"slideSeconds":0,"slideDurations":[],"nextSongDelaySeconds":3,"theme":{},"songs":[]}}"#,
                 is_local_presenter,
                 self.server_running,
                 escape_json(&self.local_ip),
                 self.port,
+                escape_json(playlist_name),
+                escape_json(playlist_file),
+                escape_json(&playlist_schedule),
                 SONGS_DIR,
                 theme_json
             )
@@ -366,7 +561,7 @@ impl AppState {
 
     pub fn songs_catalog_json(&self) -> String {
         let items: Vec<String> = self
-            .songs
+            .all_songs
             .iter()
             .enumerate()
             .map(|(i, s)| {
@@ -408,6 +603,93 @@ impl AppState {
     }
 }
 
+fn resolve_active_songs(
+    all_songs: &[SongRecord],
+    playlists: &[PlaylistRecord],
+    active_filename: Option<&str>,
+) -> Vec<SongRecord> {
+    if let Some(target_file) = active_filename {
+        if let Some(pl) = playlists.iter().find(|p| p.filename == target_file) {
+            return pl
+                .songs
+                .iter()
+                .filter_map(|song_file| all_songs.iter().find(|s| &s.filename == song_file).cloned())
+                .collect();
+        }
+    }
+    all_songs.to_vec()
+}
+
+fn load_playlists_from_dir(dir: &str) -> Vec<PlaylistRecord> {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return Vec::new();
+    };
+
+    let mut files: Vec<PathBuf> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.is_file() && p.extension().and_then(|e| e.to_str()) == Some("json"))
+        .collect();
+
+    files.sort();
+
+    let mut list = Vec::new();
+    for path in files {
+        let Some(filename) = path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let Ok(content) = fs::read_to_string(&path) else {
+            continue;
+        };
+        let Ok(Value::Object(map)) = crate::json::parse(&content) else {
+            continue;
+        };
+        let name = match map.get("name") {
+            Some(Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
+            _ => filename.trim_end_matches(".json").to_string(),
+        };
+        let year_opt = match map.get("year") {
+            Some(Value::String(s)) => Some(s.trim().to_string()),
+            Some(Value::Number(n)) => Some(n.clone()),
+            _ => None,
+        };
+        let mut date = match map.get("date") {
+            Some(Value::String(s)) => s.trim().to_string(),
+            _ => String::new(),
+        };
+        if let Some(y) = year_opt {
+            if !y.is_empty() && !date.is_empty() && !date.contains(&y) {
+                date = format!("{y}-{date}");
+            }
+        }
+        let time = match map.get("time") {
+            Some(Value::String(s)) => s.trim().to_string(),
+            _ => String::new(),
+        };
+        let songs = match map.get("songs") {
+            Some(Value::Array(arr)) => arr
+                .iter()
+                .filter_map(|v| match v {
+                    Value::String(s) => Some(s.trim().to_string()),
+                    _ => None,
+                })
+                .filter(|s| !s.is_empty())
+                .collect(),
+            _ => Vec::new(),
+        };
+
+        list.push(PlaylistRecord {
+            filename: filename.to_string(),
+            name,
+            date,
+            time,
+            songs,
+        });
+    }
+
+    list
+}
+
 fn default_theme_presets() -> Vec<SlideTheme> {
     vec![
         SlideTheme::default(),
@@ -432,30 +714,30 @@ fn load_themes_from_file(path: &str) -> Vec<SlideTheme> {
     let Ok(content) = fs::read_to_string(path) else {
         return default_theme_presets();
     };
-    let Ok(crate::json::Value::Array(arr)) = crate::json::parse(&content) else {
+    let Ok(Value::Array(arr)) = crate::json::parse(&content) else {
         return default_theme_presets();
     };
     let mut list = Vec::new();
     for item in arr {
-        if let crate::json::Value::Object(map) = item {
+        if let Value::Object(map) = item {
             let name = match map.get("name") {
-                Some(crate::json::Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
+                Some(Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
                 _ => continue,
             };
             let bg = match map.get("bg") {
-                Some(crate::json::Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
+                Some(Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
                 _ => "#121417".to_string(),
             };
             let text = match map.get("text") {
-                Some(crate::json::Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
+                Some(Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
                 _ => "#f9fafb".to_string(),
             };
             let chord = match map.get("chord") {
-                Some(crate::json::Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
+                Some(Value::String(s)) if !s.trim().is_empty() => s.trim().to_string(),
                 _ => "#fbbf24".to_string(),
             };
             let show_chords = match map.get("showChords") {
-                Some(crate::json::Value::Bool(b)) => *b,
+                Some(Value::Bool(b)) => *b,
                 _ => true,
             };
             list.push(SlideTheme {

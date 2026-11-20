@@ -1,13 +1,5 @@
 //! Minimalny generator kodów QR (wersje 1-L..=6-L, tryb Byte, korekcja błędów L)
 //! na licencji MIT, bez zewnętrznych zależności.
-//!
-//! Obsługuje adresy IPv4, IPv6 oraz URL-e z portem do 134 bajtów:
-//! - V1-L (21x21): do 17 bajtów
-//! - V2-L (25x25): do 32 bajtów
-//! - V3-L (29x29): do 53 bajtów
-//! - V4-L (33x33): do 78 bajtów
-//! - V5-L (37x37): do 106 bajtów
-//! - V6-L (41x41): do 134 bajtów
 
 #[derive(Debug, Clone)]
 pub struct QrCode {
@@ -200,21 +192,17 @@ fn build_data_codewords(data: &[u8], total_data_cw: usize) -> Vec<u8> {
     let total_bits = total_data_cw * 8;
     let mut bits: Vec<u8> = Vec::with_capacity(total_bits);
 
-    // Tryb Byte: 0100
     push_bits(&mut bits, 0b0100, 4);
-    // Licznik bajtów (dla wersji 1..=9 w trybie Byte ma 8 bitów)
     push_bits(&mut bits, data.len() as u32, 8);
     for &b in data {
         push_bits(&mut bits, b as u32, 8);
     }
 
-    // Terminator (do 4 zer)
     let term_len = (total_bits.saturating_sub(bits.len())).min(4);
     for _ in 0..term_len {
         bits.push(0);
     }
 
-    // Dopełnienie do pełnego bajtu
     while bits.len() % 8 != 0 {
         bits.push(0);
     }
@@ -273,8 +261,6 @@ fn interleave_codewords(data_cw: &[u8], blocks: usize, ecc_per_block: usize) -> 
     out
 }
 
-// --- GF(2^8) z wielomianem pierwotnym 0x11D ---
-
 fn gf_mul(mut a: u8, mut b: u8) -> u8 {
     let mut p = 0u8;
     for _ in 0..8 {
@@ -327,8 +313,6 @@ fn rs_encode(data: &[u8], ecc_len: usize) -> Vec<u8> {
 
     ecc
 }
-
-// --- Budowa matrycy QR ---
 
 fn set_mod(
     matrix: &mut [Option<bool>],
