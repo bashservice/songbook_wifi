@@ -14,6 +14,7 @@ html, body {
   background: #121417;
   color: #f3f4f6;
   font-family: system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   display: flex;
@@ -24,86 +25,82 @@ body {
 .bar {
   display: flex;
   flex: 0 0 auto;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 7px 10px;
   background: #1c2026;
   align-items: center;
   flex-wrap: wrap;
   border-bottom: 1px solid #2b323d;
 }
-.theme-bar {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 8px;
-  padding: 6px 12px;
-  background: #191d24;
-  align-items: center;
-  flex-wrap: wrap;
-  border-bottom: 1px solid #2b323d;
-  font-size: 12px;
-}
-.theme-item {
+.icon-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  color: #cbd5e1;
-}
-.theme-item input[type="color"] {
-  width: 24px;
-  height: 22px;
-  padding: 0;
+  justify-content: center;
+  gap: 6px;
+  min-width: 40px;
+  min-height: 38px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: #252c37;
   border: 1px solid #3d4756;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-}
-.theme-item input[type="checkbox"] {
-  cursor: pointer;
-}
-.theme-preset-input {
-  width: 120px;
-  background: #14181e;
   color: #f3f4f6;
-  border: 1px solid #3d4756;
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  touch-action: manipulation;
 }
-.theme-preset-select {
-  background: #14181e;
-  color: #f3f4f6;
-  border: 1px solid #3d4756;
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12px;
+.icon-nav-btn .nav-label {
+  display: none;
+}
+@media (min-width: 640px) {
+  .icon-nav-btn .nav-label {
+    display: inline;
+  }
+}
+.icon-nav-btn.active {
+  border-color: #60a5fa;
+  background: #1e3a5f;
+}
+.icon-nav-btn.nav-songs {
+  background: #0f4c48;
+  border-color: #14b8a6;
+}
+.icon-nav-btn.nav-playlist {
+  background: #172d4d;
+  border-color: #3b82f6;
+}
+.icon-nav-btn.nav-display {
+  background: #232838;
+  border-color: #6366f1;
+}
+.icon-nav-btn.srv-power-btn {
+  margin-left: auto;
+  background: #14532d;
+  border-color: #22c55e;
+  color: #dcfce7;
+}
+.icon-nav-btn.srv-power-btn.offline {
+  background: #450a0a;
+  border-color: #ef4444;
+  color: #fecaca;
 }
 .player-bar {
   display: flex;
   flex: 0 0 auto;
-  gap: 8px;
-  padding: 6px 12px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
   background: #181c22;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  justify-content: center;
   border-top: 1px solid #2b323d;
 }
-.player-left {
+.player-status-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 28px;
-}
-.bottom-bar {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 10px;
-  padding: 7px 12px;
-  background: #14181e;
-  align-items: center;
+  min-height: 22px;
   flex-wrap: wrap;
-  border-top: 1px solid #2b323d;
-  font-size: 13px;
 }
 .hidden { display: none !important; }
 button {
@@ -114,6 +111,7 @@ button {
   padding: 7px 12px;
   cursor: pointer;
   font-size: 13px;
+  touch-action: manipulation;
 }
 button:hover { background: #374151; }
 button:disabled {
@@ -125,53 +123,19 @@ button.active {
   background: #1e3a5f;
 }
 button.presenter-toggle {
-  padding: 6px 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   background: #2563eb;
   border-color: #3b82f6;
   color: #ffffff;
-}
-button.presenter-toggle:hover {
-  background: #1d4ed8;
 }
 button.presenter-toggle.panel-hidden {
   background: #1f242d;
   border-color: #4b5563;
   color: #9ca3af;
 }
-button.presenter-toggle.panel-hidden:hover {
-  background: #2b323d;
-  color: #e5e7eb;
-}
-button.nav-songs {
-  background: #0f766e;
-  border-color: #14b8a6;
-  font-weight: 600;
-}
-button.btn-playlist {
-  background: #1e3a5f;
-  border-color: #3b82f6;
-  font-weight: 600;
-}
 button.btn-save {
   background: #16a34a;
   border-color: #22c55e;
   font-weight: 600;
-}
-button.btn-danger-right {
-  background: #450a0a;
-  border-color: #dc2626;
-  color: #fecaca;
-  font-weight: 700;
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-button.btn-danger-right:hover {
-  background: #7f1d1d;
 }
 button.btn-danger-inline {
   background: #450a0a;
@@ -182,21 +146,17 @@ button.btn-danger-inline {
 button.btn-danger-inline:hover:not(:disabled) {
   background: #7f1d1d;
 }
-.shutdown-icon {
-  color: #ef4444;
-  font-size: 15px;
-  line-height: 1;
-  font-weight: 900;
-}
 button.btn-sm {
-  padding: 5px 10px;
+  padding: 6px 10px;
   font-size: 12px;
 }
 button.btn-transport {
   font-weight: 800;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
-  padding: 6px 11px;
+  min-width: 48px;
+  min-height: 40px;
+  padding: 8px 13px;
   letter-spacing: 0.04em;
   background: #252c37;
   border-color: #4b5563;
@@ -211,69 +171,54 @@ button.btn-transport.paused {
   color: #fef3c7;
 }
 .transport-group {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
   flex-wrap: wrap;
+  width: 100%;
 }
 button.btn-srv-stop {
   background: #7f1d1d;
   border-color: #ef4444;
   font-weight: 700;
-  padding: 6px 10px;
+  min-height: 40px;
+  padding: 8px 12px;
   font-size: 12px;
 }
 button.btn-srv-start {
   background: #14532d;
   border-color: #22c55e;
   font-weight: 700;
-  padding: 6px 10px;
+  min-height: 40px;
+  padding: 8px 12px;
   font-size: 12px;
-}
-#presenter-controls {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
 }
 .playlist-chip {
   font-size: 12px;
   color: #93c5fd;
   background: #152238;
   border: 1px solid #2b4c7e;
-  padding: 4px 9px;
+  padding: 3px 9px;
   border-radius: 999px;
-}
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  flex: 0 0 auto;
-}
-.dot-ok {
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
-}
-.dot-stop {
-  background: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
 }
 .ip-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  color: #e2e8f0;
+  font-size: 12px;
+  color: #cbd5e1;
+  word-break: break-all;
+  text-align: center;
 }
 .auto-badge {
   font-size: 12px;
-  padding: 4px 9px;
+  padding: 3px 9px;
   border-radius: 999px;
   background: #1e293b;
   border: 1px solid #38bdf8;
   color: #7dd3fc;
   font-weight: 700;
 }
-.info {
-  margin-left: auto;
+.meta-inline {
   font-size: 12px;
   color: #9ca3af;
 }
@@ -282,31 +227,36 @@ button.btn-srv-start {
   display: block;
   width: 100%;
   min-height: 0;
-  touch-action: manipulation;
+  touch-action: pan-y;
 }
 
 .qr-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 16px;
+  padding: 14px;
+  overflow-y: auto;
+  touch-action: pan-y;
 }
 .qr-modal {
   background: #1b2028;
   border: 1px solid #3b4656;
-  border-radius: 10px;
-  padding: 18px 20px;
-  max-width: 420px;
+  border-radius: 12px;
+  padding: 16px 18px;
+  max-width: 440px;
   width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 12px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  touch-action: pan-y;
 }
 .qr-modal-title {
   margin: 0;
@@ -339,12 +289,62 @@ button.btn-srv-start {
   text-align: center;
   min-height: 18px;
 }
+.display-sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.theme-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #161a20;
+  border: 1px solid #2b323d;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #e2e8f0;
+  font-size: 13px;
+}
+.theme-item.span-2 {
+  grid-column: span 2;
+  justify-content: flex-start;
+}
+.theme-item input[type="color"] {
+  width: 32px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #3d4756;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+.theme-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+.theme-preset-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.theme-preset-row input {
+  flex: 1 1 150px;
+}
+.modal-actions-row {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
 .pl-picker-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
+  touch-action: pan-y;
 }
 .pl-picker-item {
   text-align: left;
@@ -376,6 +376,7 @@ button.btn-srv-start {
   grid-template-columns: 310px minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
+  touch-action: pan-y;
 }
 .songs-sidebar {
   background: #161a20;
@@ -385,6 +386,7 @@ button.btn-srv-start {
   padding: 12px;
   gap: 10px;
   min-height: 0;
+  touch-action: pan-y;
 }
 .sidebar-top {
   display: flex;
@@ -405,9 +407,11 @@ button.btn-srv-start {
 #pl-selected-list {
   flex: 1 1 auto;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  touch-action: pan-y;
 }
 #pl-editor-list {
   max-height: 220px;
@@ -433,12 +437,14 @@ button.btn-srv-start {
   margin-top: 2px;
 }
 .song-editor {
-  padding: 14px 18px 24px;
+  padding: 14px 18px 28px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  touch-action: pan-y;
 }
 .editor-header {
   display: flex;
@@ -519,6 +525,7 @@ button.btn-srv-start {
   flex-direction: column;
   gap: 8px;
   max-height: 240px;
+  touch-action: pan-y;
 }
 .pl-box-title {
   font-size: 13px;
@@ -556,15 +563,17 @@ input[type="text"], input[type="number"], select, textarea {
   color: #f3f4f6;
   border: 1px solid #3d4756;
   border-radius: 6px;
-  padding: 7px 9px;
+  padding: 8px 10px;
   font-size: 14px;
   font-family: inherit;
+  touch-action: manipulation;
 }
 textarea {
   min-height: 220px;
   resize: vertical;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   line-height: 1.45;
+  touch-action: pan-y;
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
@@ -597,6 +606,8 @@ input:focus, select:focus, textarea:focus {
     height: auto;
     min-height: 100dvh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   #playlist-editor-view,
   #songs-view {
@@ -610,15 +621,13 @@ input:focus, select:focus, textarea:focus {
     border-bottom: 1px solid #2b323d;
     flex: 0 0 auto;
   }
-  #pl-editor-list {
-    max-height: 150px;
-  }
+  #pl-editor-list,
   #song-list {
-    max-height: 160px;
+    max-height: 165px;
   }
   .song-editor {
     overflow-y: visible;
-    padding: 12px 12px 28px;
+    padding: 12px 12px 32px;
     flex: 0 0 auto;
   }
   .form-grid,
@@ -628,68 +637,82 @@ input:focus, select:focus, textarea:focus {
   .span-2, .span-3 { grid-column: span 1; }
 }
 @media (max-width: 600px) {
-  .bar, .theme-bar, .player-bar, .bottom-bar { padding: 7px 8px; gap: 6px; }
-  button { padding: 6px 10px; }
-  .info {
-    width: 100%;
-    margin-left: 0;
-    overflow-wrap: anywhere;
-  }
+  .bar { padding: 6px 8px; gap: 5px; }
+  .player-bar { padding: 7px 8px calc(7px + env(safe-area-inset-bottom, 0px)); }
 }
 </style>
 </head>
 <body>
 <div class="bar" id="topbar">
-  <button id="btn-presenter" class="presenter-toggle hidden" title="Ukryj panel prezentera" onclick="togglePresenter()">
-    <svg id="icon-bust-on" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <button type="button" id="btn-presenter" class="icon-nav-btn presenter-toggle hidden" title="Przełącz panel sterowania" onclick="togglePresenter()">
+    <svg id="icon-bust-on" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <circle cx="12" cy="8" r="4"/>
       <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z"/>
     </svg>
-    <svg id="icon-bust-off" class="hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <svg id="icon-bust-off" class="hidden" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <circle cx="12" cy="8" r="4"/>
       <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
+    <span class="nav-label">Panel</span>
   </button>
-  <div id="presenter-controls" class="hidden">
-    <button type="button" id="btn-pl-select" class="btn-playlist" onclick="openPlaylistSelectModal()">Wybierz playlistę</button>
-    <button type="button" id="btn-pl-create" class="btn-playlist" onclick="openPlaylistEditor()">Utwórz playlistę</button>
-    <span id="active-playlist-label" class="playlist-chip hidden"></span>
-  </div>
-  <button id="btn-songs-view" class="nav-songs hidden" onclick="toggleSongsView()">
-    Piosenki
-  </button>
-  <div class="info" id="meta">Łączenie...</div>
-</div>
 
-<div id="theme-bar" class="theme-bar hidden">
-  <label class="theme-item" title="Kolor tła slajdu">
-    <span>Tło</span>
-    <input type="color" id="col-bg" value="#121417" onchange="onThemeChange()" />
-  </label>
-  <label class="theme-item" title="Kolor tekstu slajdu">
-    <span>Tekst</span>
-    <input type="color" id="col-text" value="#f9fafb" onchange="onThemeChange()" />
-  </label>
-  <label class="theme-item" title="Osobny kolor linii akordów (zaczynających się od .)">
-    <span>Akordy</span>
-    <input type="color" id="col-chord" value="#fbbf24" onchange="onThemeChange()" />
-  </label>
-  <label class="theme-item" title="Pokazuj lub ukryj linie akordów">
-    <input type="checkbox" id="chk-show-chords" checked onchange="onThemeChange()" />
-    <span>Pokaż akordy</span>
-  </label>
-  <input type="text" id="theme-name" class="theme-preset-input" placeholder="Nazwa motywu..." />
-  <button type="button" class="btn-sm btn-save" onclick="saveThemePreset()">Zapisz motyw</button>
-  <select id="theme-select" class="theme-preset-select" onchange="selectThemePreset(this.value)">
-    <option value="">Wybierz motyw...</option>
-  </select>
+  <button type="button" id="btn-songs-view" class="icon-nav-btn nav-songs hidden" title="Piosenki" onclick="toggleSongsView()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M9 18V5l12-2v13"/>
+      <circle cx="6" cy="18" r="3"/>
+      <circle cx="18" cy="16" r="3"/>
+    </svg>
+    <span id="btn-songs-label" class="nav-label">Piosenki</span>
+  </button>
+
+  <button type="button" id="btn-pl-select" class="icon-nav-btn nav-playlist hidden" title="Playlisty" onclick="openPlaylistSelectModal()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <line x1="8" y1="6" x2="21" y2="6"/>
+      <line x1="8" y1="12" x2="21" y2="12"/>
+      <line x1="8" y1="18" x2="21" y2="18"/>
+      <circle cx="4" cy="6" r="1.5" fill="currentColor"/>
+      <circle cx="4" cy="12" r="1.5" fill="currentColor"/>
+      <circle cx="4" cy="18" r="1.5" fill="currentColor"/>
+    </svg>
+    <span class="nav-label">Playlisty</span>
+  </button>
+
+  <button type="button" id="btn-display-modal" class="icon-nav-btn nav-display hidden" title="Prezentacja i motyw" onclick="openDisplayModal()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <rect x="7" y="2" width="10" height="20" rx="2"/>
+      <line x1="11" y1="18" x2="13" y2="18"/>
+    </svg>
+    <span class="nav-label">Prezentacja</span>
+  </button>
+
+  <button type="button" id="btn-qr" class="icon-nav-btn hidden" title="Kod QR" onclick="openQrModal()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7"/>
+      <rect x="14" y="3" width="7" height="7"/>
+      <rect x="3" y="14" width="7" height="7"/>
+      <rect x="14" y="14" width="3" height="3"/>
+      <line x1="21" y1="14" x2="21" y2="21"/>
+      <line x1="14" y1="21" x2="21" y2="21"/>
+    </svg>
+    <span class="nav-label">QR</span>
+  </button>
+
+  <button type="button" id="btn-srv-power" class="icon-nav-btn srv-power-btn hidden" title="Zamknij serwer" onclick="shutdownProgram()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
+      <path d="M12 3v9"/>
+      <path d="M6.3 6.3a8 8 0 1 0 11.4 0"/>
+    </svg>
+    <span class="nav-label">Serwer</span>
+  </button>
 </div>
 
 <canvas id="stage"></canvas>
 
 <div id="player-bar" class="player-bar hidden">
-  <div class="player-left">
+  <div class="player-status-row">
     <span id="auto-indicator" class="auto-badge hidden"></span>
+    <span id="active-playlist-label" class="playlist-chip hidden"></span>
+    <span class="meta-inline" id="meta">Łączenie...</span>
   </div>
   <div class="transport-group" aria-label="Sterowanie prezentacją">
     <button type="button" id="btn-prev" class="btn-transport" title="Wstecz" onclick="manualStep('prev')">|◄</button>
@@ -833,19 +856,45 @@ input:focus, select:focus, textarea:focus {
     <div class="editor-actions">
       <button class="btn-save" onclick="saveCurrentSong()">Zapisz</button>
       <button onclick="cancelEditing()">Anuluj</button>
-      <button id="btn-delete-song" class="btn-danger-right hidden" onclick="deleteCurrentSong()">Usuń</button>
+      <button id="btn-delete-song" class="btn-danger-inline" onclick="deleteCurrentSong()">Usuń</button>
     </div>
   </section>
 </div>
 
-<div id="bottom-bar" class="bottom-bar hidden">
-  <span id="srv-dot" class="status-dot dot-ok"></span>
-  <span id="srv-ip" class="ip-label">http://192.168.43.14:8080</span>
-  <button type="button" class="btn-sm" onclick="copyWifiAddress()">Kopiuj Wi-Fi</button>
-  <button type="button" id="btn-qr" class="btn-sm" onclick="openQrModal()">QR</button>
-  <button type="button" class="btn-sm btn-danger-right" title="Zamknij program" onclick="shutdownProgram()">
-    <span class="shutdown-icon">◉</span> Zamknij
-  </button>
+<div id="display-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onDisplayBackdropClick(event)">
+  <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="display-modal-title">
+    <h3 id="display-modal-title" class="qr-modal-title">Ustawienia prezentacji i motywu</h3>
+    <div id="srv-ip" class="ip-label">http://192.168.43.14:8080</div>
+    <div class="display-sheet-grid">
+      <label class="theme-item" title="Kolor tła slajdu">
+        <span>Tło</span>
+        <input type="color" id="col-bg" value="#121417" onchange="onThemeChange()" />
+      </label>
+      <label class="theme-item" title="Kolor tekstu slajdu">
+        <span>Tekst</span>
+        <input type="color" id="col-text" value="#f9fafb" onchange="onThemeChange()" />
+      </label>
+      <label class="theme-item" title="Osobny kolor linii akordów (zaczynających się od .)">
+        <span>Akordy</span>
+        <input type="color" id="col-chord" value="#fbbf24" onchange="onThemeChange()" />
+      </label>
+      <label class="theme-item" title="Pokazuj lub ukryj linie akordów">
+        <span>Akordy widoczne</span>
+        <input type="checkbox" id="chk-show-chords" checked onchange="onThemeChange()" />
+      </label>
+    </div>
+    <div class="theme-preset-row">
+      <input type="text" id="theme-name" placeholder="Nazwa motywu..." />
+      <button type="button" class="btn-sm btn-save" onclick="saveThemePreset()">Zapisz motyw</button>
+    </div>
+    <select id="theme-select" onchange="selectThemePreset(this.value)">
+      <option value="">Wybierz motyw...</option>
+    </select>
+    <div class="modal-actions-row">
+      <button type="button" class="btn-sm" onclick="copyWifiAddress()">Kopiuj adres Wi-Fi</button>
+      <button type="button" class="btn-sm" onclick="closeDisplayModal()">Zamknij</button>
+    </div>
+  </div>
 </div>
 
 <div id="qr-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onQrBackdropClick(event)">
@@ -860,10 +909,13 @@ input:focus, select:focus, textarea:focus {
 
 <div id="pl-select-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onPlaylistSelectBackdropClick(event)">
   <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="pl-select-modal-title">
-    <h3 id="pl-select-modal-title" class="qr-modal-title">Wybierz playlistę</h3>
+    <h3 id="pl-select-modal-title" class="qr-modal-title">Playlisty</h3>
     <input type="text" id="pl-search-input" placeholder="Szukaj po nazwie lub dacie / godzinie..." oninput="renderPlaylistPicker()" />
     <div id="pl-picker-list" class="pl-picker-list"></div>
-    <button type="button" class="btn-sm" onclick="closePlaylistSelectModal()">Zamknij</button>
+    <div class="modal-actions-row">
+      <button type="button" class="btn-sm btn-save" onclick="openPlaylistEditor()">Utwórz / edytuj playlistę</button>
+      <button type="button" class="btn-sm" onclick="closePlaylistSelectModal()">Zamknij</button>
+    </div>
   </div>
 </div>
 
@@ -882,12 +934,16 @@ let draftPlaylistSongs = [];
 let editingFilename = null;
 let resizeObserver = null;
 let themesLoadedOnce = false;
+let serverShutdownDone = false;
 
 let autoRemaining = 0;
 let autoSignature = '';
 let playbackPaused = false;
 let songTransitionRemaining = 0;
 let songTransitionTotal = 0;
+
+let touchStartX = null;
+let touchStartY = null;
 
 const CHORD_PREFIX = '\x01';
 
@@ -947,8 +1003,29 @@ function onTimePickerChange(val) {
   }
 }
 
+function openDisplayModal() {
+  if (!currentState || !currentState.canPresent) return;
+  closeQrModal();
+  closePlaylistSelectModal();
+  applyThemeFromState(currentState.theme);
+  loadThemesList();
+  document.getElementById('display-modal-backdrop').classList.remove('hidden');
+}
+
+function closeDisplayModal() {
+  document.getElementById('display-modal-backdrop').classList.add('hidden');
+}
+
+function onDisplayBackdropClick(event) {
+  if (event.target && event.target.id === 'display-modal-backdrop') {
+    closeDisplayModal();
+  }
+}
+
 async function openPlaylistSelectModal() {
   if (!currentState || !currentState.canPresent) return;
+  closeQrModal();
+  closeDisplayModal();
   await fetchPlaylistsData();
   const inp = document.getElementById('pl-search-input');
   if (inp) inp.value = '';
@@ -1044,6 +1121,8 @@ async function openPlaylistEditor() {
   songsViewOpen = false;
   playlistEditorOpen = true;
   closePlaylistSelectModal();
+  closeDisplayModal();
+  closeQrModal();
   updateUiVisibility();
   await Promise.all([loadSongsCatalog(), fetchPlaylistsData()]);
   if (!selectedEditorPlaylistFilename && allPlaylists.length > 0) {
@@ -1120,7 +1199,7 @@ function onSelectPlaylistToEdit(filename) {
   const found = allPlaylists.find(p => p.filename === filename);
   if (!found) return;
   selectedEditorPlaylistFilename = found.filename;
-  document.getElementById('pl-editor-heading').textContent = 'Edycja playlisty (zapis utworzy nowy plik przy zmianie nazwy)';
+  document.getElementById('pl-editor-heading').textContent = 'Edycja playlisty';
   document.getElementById('pl-name').value = found.name || '';
   document.getElementById('pl-date').value = found.date || '';
   document.getElementById('pl-time').value = found.time || '';
@@ -1301,6 +1380,8 @@ function setPlaylistStatus(message, isError) {
 
 function openQrModal() {
   if (!currentState || !currentState.canPresent) return;
+  closeDisplayModal();
+  closePlaylistSelectModal();
   const backdrop = document.getElementById('qr-modal-backdrop');
   const urlEl = document.getElementById('qr-modal-url');
   const boxEl = document.getElementById('qr-canvas-box');
@@ -1480,9 +1561,18 @@ async function selectThemePreset(name) {
 }
 
 function isServerActive(state, connected = true) {
+  if (serverShutdownDone) return false;
   if (!connected || !state) return false;
   if (typeof state.serverRunning === 'boolean') return state.serverRunning;
   return true;
+}
+
+function updateServerPowerIcon(connected = true) {
+  const pwrBtn = document.getElementById('btn-srv-power');
+  if (!pwrBtn) return;
+  const online = !serverShutdownDone && connected && Boolean(currentState);
+  pwrBtn.classList.toggle('offline', !online);
+  pwrBtn.title = online ? 'Serwer działa — kliknij, aby zamknąć' : 'Serwer zatrzymany / zamknięty';
 }
 
 function clearSongTransition() {
@@ -1504,9 +1594,7 @@ function togglePlaybackPause() {
   if (playbackPaused) {
     updateAutoBadge();
   } else if (currentState) {
-    if (songTransitionRemaining > 0) {
-      updateAutoBadge();
-    } else if (autoRemaining > 0) {
+    if (songTransitionRemaining > 0 || autoRemaining > 0) {
       updateAutoBadge();
     } else {
       resetAutoTimer(currentState, true);
@@ -1525,24 +1613,20 @@ function manualStep(direction) {
 
 function updateBottomBar(state, connected = true) {
   const playerBar = document.getElementById('player-bar');
-  const bar = document.getElementById('bottom-bar');
-  const dot = document.getElementById('srv-dot');
   const ipEl = document.getElementById('srv-ip');
   const toggleBtn = document.getElementById('btn-srv-toggle');
-  if (!playerBar || !bar || !dot || !ipEl || !toggleBtn) return;
+  updateServerPowerIcon(connected);
+  if (!playerBar || !toggleBtn) return;
 
   const show = Boolean(state && state.canPresent && presenterModeOpen && !isAnySubViewOpen());
   playerBar.classList.toggle('hidden', !show);
-  bar.classList.toggle('hidden', !show);
   if (!show) return;
 
   const ip = state.ip || '127.0.0.1';
   const port = state.port || 8080;
-  ipEl.textContent = `http://${ip}:${port}`;
+  if (ipEl) ipEl.textContent = `http://${ip}:${port}`;
 
   const active = isServerActive(state, connected);
-  dot.className = 'status-dot ' + (active ? 'dot-ok' : 'dot-stop');
-
   if (!connected) {
     toggleBtn.textContent = '● [Start/Stop]';
     toggleBtn.className = 'btn-srv-start';
@@ -1589,17 +1673,15 @@ async function shutdownProgram() {
     await fetch('/api/shutdown', { method: 'POST' });
   } catch (_) {}
 
+  serverShutdownDone = true;
   closeQrModal();
   closePlaylistSelectModal();
+  closeDisplayModal();
   currentState = null;
   updateBottomBar(null, false);
   document.getElementById('meta').textContent = 'Program został zamknięty.';
-  const themeBar = document.getElementById('theme-bar');
-  if (themeBar) themeBar.classList.add('hidden');
   const playerBar = document.getElementById('player-bar');
   if (playerBar) playerBar.classList.add('hidden');
-  const bar = document.getElementById('bottom-bar');
-  if (bar) bar.classList.add('hidden');
 }
 
 function getActiveSlideSeconds(state) {
@@ -1717,10 +1799,14 @@ function togglePresenter() {
 async function toggleSongsView() {
   if (!currentState || !currentState.canPresent) return;
   playlistEditorOpen = false;
+  closeDisplayModal();
+  closePlaylistSelectModal();
+  closeQrModal();
   songsViewOpen = !songsViewOpen;
   updateUiVisibility();
   if (songsViewOpen) {
     await loadSongsCatalog();
+    window.scrollTo({ top: 0, behavior: 'auto' });
   } else {
     resize();
   }
@@ -1731,8 +1817,11 @@ function updateUiVisibility() {
   const iconBustOn = document.getElementById('icon-bust-on');
   const iconBustOff = document.getElementById('icon-bust-off');
   const btnSongsView = document.getElementById('btn-songs-view');
-  const controls = document.getElementById('presenter-controls');
-  const themeBar = document.getElementById('theme-bar');
+  const btnSongsLabel = document.getElementById('btn-songs-label');
+  const btnPlSelect = document.getElementById('btn-pl-select');
+  const btnDisplay = document.getElementById('btn-display-modal');
+  const btnQr = document.getElementById('btn-qr');
+  const btnSrvPower = document.getElementById('btn-srv-power');
   const songsView = document.getElementById('songs-view');
   const plEditorView = document.getElementById('playlist-editor-view');
 
@@ -1742,34 +1831,45 @@ function updateUiVisibility() {
     playlistEditorOpen = false;
     closeQrModal();
     closePlaylistSelectModal();
+    closeDisplayModal();
   }
 
   btnSongsView.classList.toggle('hidden', !isPresenter);
-  btnSongsView.textContent = songsViewOpen ? '← Prezentacja' : 'Piosenki';
+  if (btnSongsLabel) {
+    btnSongsLabel.textContent = songsViewOpen ? 'Prezentacja' : 'Piosenki';
+  }
+  btnSongsView.title = songsViewOpen ? 'Wróć do prezentacji' : 'Piosenki';
   btnSongsView.classList.toggle('active', songsViewOpen);
 
   canvas.classList.toggle('hidden', isAnySubViewOpen());
   songsView.classList.toggle('hidden', !songsViewOpen);
   plEditorView.classList.toggle('hidden', !playlistEditorOpen);
 
-  if (!currentState) return;
-
-  if (isPresenter && !isAnySubViewOpen()) {
-    btnPresenter.classList.remove('hidden');
-    btnPresenter.classList.toggle('panel-hidden', !presenterModeOpen);
-    if (iconBustOn) iconBustOn.classList.toggle('hidden', !presenterModeOpen);
-    if (iconBustOff) iconBustOff.classList.toggle('hidden', presenterModeOpen);
-    btnPresenter.title = presenterModeOpen ? 'Ukryj panel prezentera' : 'Pokaż panel prezentera';
-    controls.classList.toggle('hidden', !presenterModeOpen);
-    if (themeBar) themeBar.classList.toggle('hidden', !presenterModeOpen);
-    if (!themesLoadedOnce) {
-      themesLoadedOnce = true;
-      loadThemesList();
-    }
-  } else {
+  if (!currentState) {
     btnPresenter.classList.add('hidden');
-    controls.classList.add('hidden');
-    if (themeBar) themeBar.classList.add('hidden');
+    btnPlSelect.classList.add('hidden');
+    btnDisplay.classList.add('hidden');
+    btnQr.classList.add('hidden');
+    btnSrvPower.classList.toggle('hidden', !serverShutdownDone);
+    updateBottomBar(null, false);
+    return;
+  }
+
+  const showNav = isPresenter && !isAnySubViewOpen();
+  btnPresenter.classList.toggle('hidden', !showNav);
+  btnPresenter.classList.toggle('panel-hidden', !presenterModeOpen);
+  if (iconBustOn) iconBustOn.classList.toggle('hidden', !presenterModeOpen);
+  if (iconBustOff) iconBustOff.classList.toggle('hidden', presenterModeOpen);
+  btnPresenter.title = presenterModeOpen ? 'Ukryj belkę sterowania' : 'Pokaż belkę sterowania';
+
+  btnPlSelect.classList.toggle('hidden', !isPresenter);
+  btnDisplay.classList.toggle('hidden', !isPresenter);
+  btnQr.classList.toggle('hidden', !isPresenter);
+  btnSrvPower.classList.toggle('hidden', !isPresenter);
+
+  if (isPresenter && !themesLoadedOnce) {
+    themesLoadedOnce = true;
+    loadThemesList();
   }
   updateBottomBar(currentState, true);
   updateAutoBadge();
@@ -1887,8 +1987,8 @@ function renderToolbar(state, forceTimerReset = false) {
   if (plLabel) {
     if (state.playlistName) {
       plLabel.textContent = state.playlistSchedule
-        ? `Playlista: ${state.playlistName} (${state.playlistSchedule})`
-        : `Playlista: ${state.playlistName}`;
+        ? `${state.playlistName} (${state.playlistSchedule})`
+        : state.playlistName;
       plLabel.classList.remove('hidden');
     } else {
       plLabel.textContent = '';
@@ -1907,6 +2007,7 @@ function renderToolbar(state, forceTimerReset = false) {
 }
 
 async function refreshState() {
+  if (serverShutdownDone) return;
   try {
     const response = await fetch('/api/state', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -2129,10 +2230,45 @@ function setEditorStatus(message, isError) {
   el.className = 'status-msg ' + (message ? (isError ? 'status-err' : 'status-ok') : '');
 }
 
+canvas.addEventListener('touchstart', event => {
+  if (!currentState || !currentState.canPresent || isAnySubViewOpen()) return;
+  if (event.touches.length !== 1) return;
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+}, { passive: true });
+
+canvas.addEventListener('touchend', event => {
+  if (touchStartX === null || touchStartY === null) return;
+  if (!currentState || !currentState.canPresent || isAnySubViewOpen()) {
+    touchStartX = null;
+    touchStartY = null;
+    return;
+  }
+  const changed = event.changedTouches[0];
+  if (!changed) {
+    touchStartX = null;
+    touchStartY = null;
+    return;
+  }
+  const dx = changed.clientX - touchStartX;
+  const dy = changed.clientY - touchStartY;
+  touchStartX = null;
+  touchStartY = null;
+
+  if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+    if (dx < 0) {
+      manualStep('next');
+    } else {
+      manualStep('prev');
+    }
+  }
+}, { passive: true });
+
 window.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
     closeQrModal();
     closePlaylistSelectModal();
+    closeDisplayModal();
     return;
   }
   if (!currentState || !currentState.canPresent || isAnySubViewOpen()) return;
