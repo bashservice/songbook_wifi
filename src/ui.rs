@@ -3,7 +3,7 @@ pub const HTML_PAGE: &str = r##"<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>songbookclear</title>
+<title>songbookwifi</title>
 <style>
 * { box-sizing: border-box; }
 html, body {
@@ -264,6 +264,60 @@ button.btn-srv-start {
   width: 100%;
   min-height: 0;
   touch-action: manipulation;
+}
+
+/* Okienko QR otwierane dopiero po kliknięciu przycisku QR */
+.qr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.qr-modal {
+  background: #1b2028;
+  border: 1px solid #3b4656;
+  border-radius: 10px;
+  padding: 18px 20px;
+  max-width: 360px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.qr-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+.qr-modal-url {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: #93c5fd;
+  word-break: break-all;
+  text-align: center;
+}
+.qr-canvas-box {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 188px;
+  min-width: 188px;
+}
+.qr-status-text {
+  font-size: 12px;
+  color: #cbd5e1;
+  text-align: center;
+  min-height: 18px;
 }
 
 #songs-view {
@@ -560,9 +614,20 @@ input:focus, textarea:focus {
   <span id="srv-dot" class="status-dot dot-ok"></span>
   <span id="srv-ip" class="ip-label">http://192.168.43.14:8080</span>
   <button type="button" class="btn-sm" onclick="copyWifiAddress()">Kopiuj Wi-Fi</button>
+  <button type="button" id="btn-qr" class="btn-sm" onclick="openQrModal()">QR</button>
   <button type="button" class="btn-sm btn-danger-right" title="Zamknij program" onclick="shutdownProgram()">
     <span class="shutdown-icon">◉</span> Zamknij
   </button>
+</div>
+
+<div id="qr-modal-backdrop" class="qr-modal-backdrop hidden" onclick="onQrBackdropClick(event)">
+  <div class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+    <h3 id="qr-modal-title" class="qr-modal-title">Kod QR dla uczestników</h3>
+    <div id="qr-modal-url" class="qr-modal-url"></div>
+    <div id="qr-canvas-box" class="qr-canvas-box"></div>
+    <div id="qr-status-text" class="qr-status-text"></div>
+    <button type="button" class="btn-sm" onclick="closeQrModal()">Zamknij okno</button>
+  </div>
 </div>
 
 <script>
@@ -593,6 +658,63 @@ const DEFAULT_THEME = {
 };
 
 let activeTheme = { ...DEFAULT_THEME };
+
+function openQrModal() {
+  if (!currentState || !currentState.canPresent) return;
+  const backdrop = document.getElementById('qr-modal-backdrop');
+  const urlEl = document.getElementById('qr-modal-url');
+  const boxEl = document.getElementById('qr-canvas-box');
+  const statusEl = document.getElementById('qr-status-text');
+  if (!backdrop || !urlEl || !boxEl || !statusEl) return;
+
+  const fallbackUrl = `http://${currentState.ip || '127.0.0.1'}:${currentState.port || 8080}`;
+  urlEl.textContent = fallbackUrl;
+  boxEl.innerHTML = '';
+  statusEl.textContent = 'Generowanie kodu QR...';
+  backdrop.classList.remove('hidden');
+
+  generateQrBelowInModal(fallbackUrl);
+}
+
+async function generateQrBelowInModal(fallbackUrl) {
+  const urlEl = document.getElementById('qr-modal-url');
+  const boxEl = document.getElementById('qr-canvas-box');
+  const statusEl = document.getElementById('qr-status-text');
+  if (!boxEl || !statusEl) return;
+
+  try {
+    const res = await fetch('/api/qr', { cache: 'no-store' });
+    const data = await res.json();
+    if (urlEl && data.url) {
+      urlEl.textContent = data.url;
+    }
+    if (!res.ok || !data.ok || !data.svg) {
+      boxEl.innerHTML = '';
+      statusEl.textContent = data.error || `Nie udało się wygenerować kodu QR dla ${fallbackUrl}.`;
+      return;
+    }
+    boxEl.innerHTML = data.svg;
+    statusEl.textContent = 'Zeskanuj aparatem w telefonie, aby otworzyć podgląd.';
+  } catch (_) {
+    boxEl.innerHTML = '';
+    statusEl.textContent = 'Błąd połączenia podczas generowania kodu QR.';
+  }
+}
+
+function closeQrModal() {
+  const backdrop = document.getElementById('qr-modal-backdrop');
+  const boxEl = document.getElementById('qr-canvas-box');
+  const statusEl = document.getElementById('qr-status-text');
+  if (backdrop) backdrop.classList.add('hidden');
+  if (boxEl) boxEl.innerHTML = '';
+  if (statusEl) statusEl.textContent = '';
+}
+
+function onQrBackdropClick(event) {
+  if (event.target && event.target.id === 'qr-modal-backdrop') {
+    closeQrModal();
+  }
+}
 
 function applyThemeFromState(themeObj) {
   if (!themeObj) return;
@@ -826,9 +948,9 @@ async function shutdownProgram() {
   try {
     await fetch('/api/shutdown', { method: 'POST' });
   } catch (_) {
-    // Połączenie zostaje przerwane w momencie zamykania procesu
   }
 
+  closeQrModal();
   currentState = null;
   updateBottomBar(null, false);
   document.getElementById('meta').textContent = 'Program został zamknięty.';
@@ -975,6 +1097,7 @@ function updateUiVisibility() {
   const isPresenter = Boolean(currentState && currentState.canPresent);
   if (!isPresenter) {
     songsViewOpen = false;
+    closeQrModal();
   }
 
   btnSongsView.classList.toggle('hidden', !isPresenter);
@@ -1360,6 +1483,10 @@ function setEditorStatus(message, isError) {
 }
 
 window.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closeQrModal();
+    return;
+  }
   if (!currentState || !currentState.canPresent || songsViewOpen) return;
   if (event.key === 'ArrowRight' || event.key === ' ') {
     event.preventDefault();

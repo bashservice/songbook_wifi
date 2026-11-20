@@ -1,4 +1,5 @@
 mod json;
+mod qr;
 mod server;
 mod state;
 mod ui;
@@ -16,7 +17,7 @@ fn main() {
 
     {
         let guard = state.lock().unwrap();
-        println!("=== songbookclear ===");
+        println!("=== songbookwifi ===");
         println!(
             "Tryb prowadzącego (lokalnie): http://127.0.0.1:{}",
             guard.port

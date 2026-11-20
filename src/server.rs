@@ -6,10 +6,10 @@ use std::thread;
 use std::time::Duration;
 
 use crate::json::{parse, parse_song, Value};
+use crate::qr;
 use crate::state::{escape_json, Action, AppState};
 use crate::ui::HTML_PAGE;
 
-/// Edycja piosenek dostępna wyłącznie dla prowadzącego (lokalnie).
 const ALLOW_REMOTE_SONGS_EDIT: bool = false;
 
 fn is_local_client(peer_ip: IpAddr, server_local_ip: &str) -> bool {
@@ -70,6 +70,40 @@ pub fn handle_client(mut stream: TcpStream, state: Arc<Mutex<AppState>>) {
     match (method, path) {
         ("GET", "/") => {
             write_response(&mut stream, "200 OK", "text/html; charset=utf-8", HTML_PAGE);
+        }
+        ("GET", "/api/qr") => {
+            if !is_local {
+                write_response(
+                    &mut stream,
+                    "403 Forbidden",
+                    "application/json; charset=utf-8",
+                    r#"{"ok":false,"error":"Kod QR dostępny wyłącznie lokalnie."}"#,
+                );
+                return;
+            }
+            let url = {
+                let guard = state.lock().unwrap();
+                format!("http://{}:{}", guard.local_ip, guard.port)
+            };
+            match qr::encode_text(&url) {
+                Ok(code) => {
+                    let svg = code.to_svg(8, 3, "#111827", "#ffffff");
+                    let resp = format!(
+                        r#"{{"ok":true,"url":"{}","svg":"{}"}}"#,
+                        escape_json(&url),
+                        escape_json(&svg)
+                    );
+                    write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &resp);
+                }
+                Err(err) => {
+                    let resp = format!(
+                        r#"{{"ok":false,"url":"{}","error":"{}"}}"#,
+                        escape_json(&url),
+                        escape_json(&err)
+                    );
+                    write_response(&mut stream, "200 OK", "application/json; charset=utf-8", &resp);
+                }
+            }
         }
         ("GET", "/api/state") => {
             let json = {
